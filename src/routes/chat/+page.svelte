@@ -2,7 +2,7 @@
 	import PageHeader from "$lib/components/PageHeader.svelte";
 	import MarkdownLite from "$lib/components/MarkdownLite.svelte";
 	import StatusDot from "$lib/components/StatusDot.svelte";
-	import { workspaceId, toastOk, toastErr } from "$lib/stores";
+	import { workspaceId, toastOk, toastErr, errorText } from "$lib/stores";
 	import { gq, mx, ax } from "$lib/convex";
 	import { route, detectTask, DEFAULT_MODELS, TASK_TYPES } from "$lib/routing";
 	import CopyButton from "$lib/components/CopyButton.svelte";
@@ -29,19 +29,21 @@
 	const S_routingRules = $derived(wid ? gq("settings.readSetting", { workspaceId: wid, key: "routing.rules" }) : null);
 	const routingRules = $derived(S_routingRules ? $S_routingRules : null);
 
-	async function newChat() {
-		const id = await mx("chats.create", { workspaceId: wid, title: "New chat", model: "auto", provider: "auto", routedBy: "gururoute" });
+	async function newChat(title = "New chat") {
+		const id = (await mx("chats.create", { workspaceId: wid, title, model: "auto", provider: "auto", routedBy: "gururoute" })) as unknown as string;
 		activeChat = id;
+		return id;
 	}
 
 	async function send() {
 		const text = draft.trim();
 		if (!text || sending) return;
-		if (!currentChat) await newChat();
 		sending = true;
+		draft = "";
 		try {
-			const chatId = currentChat ? currentChat._id : activeChat;
-			draft = "";
+			const chatId = currentChat?._id || activeChat || (await newChat(text.slice(0, 70))) || "";
+			if (!chatId) throw new Error("Could not open a chat. Check your connection and try again.");
+			activeChat = chatId;
 			await mx("chats.addMessage", { chatId, workspaceId: wid, role: "user", content: text });
 			// Route the task.
 			const task = detectTask(text);
@@ -55,7 +57,10 @@
 			if (autoRoute) toastOk(`GuruRoute → ${result.provider} (${task})`);
 		} catch (e) {
 			toastErr(e);
-			await mx("chats.addMessage", { chatId: currentChat?._id ?? activeChat, workspaceId: wid, role: "system", content: `⚠️ ${e instanceof Error ? e.message : String(e)}` });
+			const errText = errorText(e);
+			if (activeChat) {
+				await mx("chats.addMessage", { chatId: activeChat, workspaceId: wid, role: "system", content: `⚠️ ${errText}` }).catch(() => {});
+			}
 		} finally {
 			sending = false;
 		}

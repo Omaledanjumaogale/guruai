@@ -50,6 +50,54 @@
 		}
 	}
 
+	let pasted = $state("");
+	let pasteTitle = $state("");
+	let pasteBusy = $state(false);
+
+	/** Parse SRT/VTT or plain text into timestamped segments. */
+	function parsePasted(text: string): { segments: { start: number; text: string }[]; content: string } {
+		const blocks = text.split(/\r?\n\s*\r?\n/).map((b) => b.trim()).filter(Boolean);
+		const segments: { start: number; text: string }[] = [];
+		for (const block of blocks) {
+			const lines = block.split(/\r?\n/);
+			const idx = lines.findIndex((l) => l.includes("-->"));
+			if (idx === -1) continue;
+			const stamp = lines[idx].split("-->")[0].trim().replace(",", ".");
+			const parts = stamp.split(":").map(Number);
+			const start = parts.length === 3 ? parts[0] * 3600 + parts[1] * 60 + parts[2] : (parts[0] ?? 0) * 60 + (parts[1] ?? 0);
+			const body = lines.slice(idx + 1).join(" ").replace(/<[^>]+>/g, "").trim();
+			if (body) segments.push({ start, text: body });
+		}
+		const content = segments.length ? segments.map((s) => s.text).join(" ") : text.replace(/\r/g, "").trim();
+		return { segments, content };
+	}
+
+	async function savePasted() {
+		const raw = pasted.trim();
+		if (!raw || pasteBusy) return;
+		pasteBusy = true;
+		try {
+			const parsed = parsePasted(raw);
+			const id = await mx("transcripts.create", {
+				workspaceId: wid,
+				videoId: "pasted",
+				url: url.trim(),
+				title: pasteTitle.trim() || `Pasted transcript — ${new Date().toLocaleDateString()}`,
+				language: "en",
+				content: parsed.content,
+				segments: parsed.segments.length ? parsed.segments : undefined
+			});
+			activeId = id as unknown as string;
+			pasted = "";
+			pasteTitle = "";
+			toastOk(parsed.segments.length ? "Transcript saved with timestamps" : "Transcript saved");
+		} catch (e) {
+			toastErr(e);
+		} finally {
+			pasteBusy = false;
+		}
+	}
+
 	const filteredSegments = $derived(
 		search.trim() === "" ? segments : segments.filter((s: any) => s.text.toLowerCase().includes(search.toLowerCase()))
 	);
@@ -67,7 +115,34 @@
 			{#if busy}<span class="guru-spin h-4 w-4 rounded-full border-2 border-white/30 border-t-white"></span> Fetching…{:else}Get transcript{/if}
 		</button>
 	</form>
-	<p class="mt-2 text-[11px] text-slate-500">Uses YouTube's public caption endpoints. Videos without captions can be pasted manually into Notes and summarized from the AI Toolbox.</p>
+	<p class="mt-2 text-[11px] text-slate-500">Fetches YouTube's public caption tracks. When YouTube withholds captions from a server, paste the transcript below — timestamps (.srt/.vtt) are detected automatically.</p>
+</div>
+
+<div class="guru-card mb-4 p-5">
+	<details>
+		<summary class="cursor-pointer text-sm font-semibold text-slate-200">Have the transcript already? Paste it</summary>
+		<div class="mt-3 grid gap-3">
+			<div class="grid gap-3 sm:grid-cols-2">
+				<div>
+					<label class="guru-label" for="ptitle">Title (optional)</label>
+					<input id="ptitle" class="guru-input" placeholder="e.g. Weekly all-hands" bind:value={pasteTitle} />
+				</div>
+				<div>
+					<label class="guru-label" for="purl">Source URL (optional)</label>
+					<input id="purl" class="guru-input" placeholder="https://www.youtube.com/watch?v=…" bind:value={url} />
+				</div>
+			</div>
+			<div>
+				<label class="guru-label" for="pbody">Transcript text or .srt / .vtt</label>
+				<textarea id="pbody" class="guru-input min-h-[160px]" placeholder="Paste the transcript here…" bind:value={pasted}></textarea>
+			</div>
+			<div>
+				<button class="guru-btn guru-btn-primary" disabled={pasteBusy || !pasted.trim()} onclick={savePasted}>
+					{#if pasteBusy}<span class="guru-spin h-4 w-4 rounded-full border-2 border-white/30 border-t-white"></span> Saving…{:else}Save pasted transcript{/if}
+				</button>
+			</div>
+		</div>
+	</details>
 </div>
 
 <div class="grid gap-4 lg:grid-cols-[280px_1fr]">

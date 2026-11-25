@@ -1,7 +1,7 @@
 <script lang="ts">
 	import PageHeader from "$lib/components/PageHeader.svelte";
 	import Empty from "$lib/components/Empty.svelte";
-	import { workspaceId, toastOk, toastErr } from "$lib/stores";
+	import { workspaceId, toastOk, toastErr, errorText } from "$lib/stores";
 	import { gq, mx, ax } from "$lib/convex";
 	
 
@@ -23,13 +23,16 @@
 		lastError = "";
 		const pendingId = await mx("generations.create", { workspaceId: wid, kind, prompt: text, status: "pending", params: { style } });
 		try {
-			const actionPath = engine === "deepai" && kind === "image" ? "ai.generateImage" : engine === "deepai" && kind === "video" ? "ai.generateVideo" : "ai.generateMusic";
-			const out = await ax<any>(actionPath, { workspaceId: wid, prompt: text, style, genre: style });
+			// Each action validates its own args strictly — send only what it accepts.
+			const actionPath = kind === "image" ? "ai.generateImage" : kind === "video" ? "ai.generateVideo" : "ai.generateMusic";
+			const payload: Record<string, unknown> =
+				kind === "image" ? { workspaceId: wid, prompt: text, style } : kind === "video" ? { workspaceId: wid, prompt: text } : { workspaceId: wid, prompt: text, genre: style === "none" ? undefined : style };
+			const out = await ax<any>(actionPath, payload);
 			if (!out?.url) throw new Error("The engine returned no output URL. Check the connector key and try again.");
 			await mx("generations.finish", { id: pendingId, status: "done", resultUrl: out.url });
 			toastOk("Generation complete");
 		} catch (e) {
-			lastError = e instanceof Error ? e.message : String(e);
+			lastError = errorText(e) || "Generation failed — check the engine key in the Connector Vault and try again.";
 			await mx("generations.finish", { id: pendingId, status: "error", error: lastError });
 			toastErr(e);
 		} finally {

@@ -19,6 +19,11 @@ export const TASK_TYPES = [
 ];
 
 export const DEFAULT_MODELS: Record<string, RouteCandidate[]> = {
+	agnes: [
+		{ provider: "agnes", model: "agnes-3.0-flash", label: "Agnes 3.0 Flash (deployment)" },
+		{ provider: "agnes", model: "agnes-2.5-pro-alpha", label: "Agnes 2.5 Pro Alpha" },
+		{ provider: "agnes", model: "agnes-2.5-pro-theta", label: "Agnes 2.5 Pro Theta" }
+	],
 	openai: [{ provider: "openai", model: "gpt-4o-mini", label: "GPT-4o mini" }],
 	anthropic: [{ provider: "anthropic", model: "claude-haiku-4-5", label: "Claude Haiku" }],
 	gemini: [{ provider: "gemini", model: "gemini-2.0-flash", label: "Gemini Flash" }],
@@ -71,7 +76,13 @@ export function route(
 		.filter((p, i) => avail.has(p) && order.indexOf(p) === i)
 		.map((p, i) => ({ provider: p, model: DEFAULT_MODELS[p]?.[0]?.model ?? "default", score: Number((1 - i / Math.max(order.length, 1)).toFixed(3)) }));
 	if (ranked.length === 0) {
-		return { provider: "openai", model: "gpt-4o-mini", reason: "No connectors are configured yet — using the default OpenAI route.", ranked: [] };
+		// No vault connectors yet: the deployment engine (Agnes AI) is always available.
+		return {
+			provider: "agnes",
+			model: "agnes-3.0-flash",
+			reason: "No connectors in the vault yet — using the deployment engine (Agnes 3.0 Flash).",
+			ranked: [{ provider: "agnes", model: "agnes-3.0-flash", score: 1 }]
+		};
 	}
 	return {
 		provider: ranked[0].provider,

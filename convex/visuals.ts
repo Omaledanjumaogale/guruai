@@ -1,7 +1,7 @@
 import { v } from "convex/values";
 import { action } from "./_generated/server";
 import { internal } from "./_generated/api";
-import { chatWithConnector } from "./ai";
+import { chatWithConnector, loadConnector, connectorOrEnv } from "./ai";
 import type { Id } from "./_generated/dataModel";
 
 /** Visuals — harmonized with Napkin AI: turn text into a structured diagram spec the app renders as SVG. */
@@ -15,7 +15,7 @@ export const generateVisual = action({
 	handler: async (ctx, args) => {
 		const start = Date.now();
 		const provider = args.provider ?? "openai";
-		const conn = await ctx.runQuery(internal.connectors.findForProvider, { workspaceId: args.workspaceId, provider });
+		const conn = await connectorOrEnv(ctx, args.workspaceId, provider);
 		let spec: any;
 		if (conn) {
 			try {

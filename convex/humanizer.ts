@@ -1,7 +1,7 @@
 import { v } from "convex/values";
 import { action } from "./_generated/server";
 import { internal } from "./_generated/api";
-import { chatWithConnector } from "./ai";
+import { chatWithConnector, loadConnector } from "./ai";
 import type { Id } from "./_generated/dataModel";
 
 /** Humanizer — harmonized with WriteHuman / Humbot: rewrite AI-sounding text into natural human prose. */
@@ -24,8 +24,7 @@ export const humanize = action({
 	handler: async (ctx, args) => {
 		const start = Date.now();
 		const provider = args.provider ?? "openai";
-		const conn = await ctx.runQuery(internal.connectors.findForProvider, { workspaceId: args.workspaceId, provider });
-		if (!conn) throw new Error(`No "${provider}" connector. Add a key in Connectors first.`);
+		const conn = await loadConnector(ctx, args.workspaceId, provider);
 		const strength = LEVELS[args.strength ?? "balanced"] ?? LEVELS.balanced;
 		const system = `You are an expert human editor. Rewrite AI-generated text so it reads naturally written by a skilled human. ${strength} ${args.tone ? `Target tone: ${args.tone}.` : ""} Rules: never invent facts; never add meta commentary; output ONLY the rewritten text; keep formatting (headings, lists) intact; vary sentence length; remove boilerplate AI phrases like "delve", "in today's fast-paced world", "it is important to note".`;
 		try {

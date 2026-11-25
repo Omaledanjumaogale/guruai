@@ -44,7 +44,8 @@ export function toast(kind: Toast["kind"], text: string, ms = 4200) {
 	setTimeout(() => toasts.update((t) => t.filter((x) => x.id !== id)), ms);
 }
 export const toastOk = (t: string) => toast("ok", t);
-export const toastErr = (e: unknown) => {
+/** Human-readable message for any thrown value (ConvexError data beats the wrapped message). */
+export function errorText(e: unknown): string {
 	const data = (e as { data?: unknown } | null)?.data;
 	const raw =
 		typeof data === "string" && data.trim()
@@ -52,8 +53,16 @@ export const toastErr = (e: unknown) => {
 			: e instanceof Error
 				? e.message
 				: String(e);
-	const clean = raw.replace(/^\[Request ID:[^\]]*\]\s*/i, "").replace(/Server Error\s*/i, "").trim();
-	toast("error", clean.slice(0, 300) || "Something went wrong. Please try again.");
+	return raw
+		.replace(/^\[Request ID:[^\]]*\]\s*/i, "")
+		.replace(/Uncaught (Convex)?Error:\s*/i, "")
+		.replace(/Server Error\s*/i, "")
+		.replace(/\s+/g, " ")
+		.trim();
+}
+
+export const toastErr = (e: unknown) => {
+	toast("error", errorText(e).slice(0, 300) || "Something went wrong. Please try again.");
 };
 
 // ---------------------------------------------------- command palette ----

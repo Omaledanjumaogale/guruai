@@ -39,7 +39,8 @@ export const generateKeywords = action({
 
 		let aiIdeas: string[] = [];
 		if (args.enrich !== false) {
-			const conn = await ctx.runQuery(internal.connectors.findForProvider, { workspaceId: args.workspaceId, provider: args.provider ?? "openai" });
+			const { connectorOrEnv } = await import("./ai");
+			const conn = await connectorOrEnv(ctx, args.workspaceId, args.provider ?? "openai");
 			if (conn) {
 				try {
 					const { chatWithConnector } = await import("./ai");

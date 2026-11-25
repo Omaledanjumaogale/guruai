@@ -1,4 +1,4 @@
-import { v } from "convex/values";
+import { v, ConvexError } from "convex/values";
 import { action } from "./_generated/server";
 import { internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
@@ -32,11 +32,17 @@ const DEFAULT_BASES: Record<string, string> = {
 	agnes: "https://apihub.agnes-ai.com/v1"
 };
 
-async function loadConnector(ctx: any, workspaceId: string, provider: string): Promise<Connector> {
+/**
+ * Resolve a connector for a provider, falling back to the deployment-level
+ * Agnes AI engine so every module works out of the box on a fresh workspace.
+ * Returns null when neither exists, for callers that can degrade gracefully.
+ */
+export async function connectorOrEnv(ctx: any, workspaceId: string, provider: string): Promise<Connector | null> {
 	const c = await ctx.runQuery(internal.connectors.findForProvider, { workspaceId, provider });
 	if (c) return c as Connector;
-	// Deployment-level fallback: the Agnes AI engine works even with an empty vault.
-	if (process.env.AGNES_AI_KEY) {
+	// The deployment engine only serves text and the Agnes models — image/video/music
+	// need a provider-specific key, otherwise the request reaches a foreign API and 401s.
+	if (process.env.AGNES_AI_KEY && provider !== "deepai" && provider !== "music") {
 		return {
 			_id: "env:agnes" as any,
 			provider: "agnes",
@@ -46,7 +52,20 @@ async function loadConnector(ctx: any, workspaceId: string, provider: string): P
 			status: "ok"
 		};
 	}
-	throw new Error(`No "${provider}" connector configured. Add a key in the Connector Vault (Settings → Connectors) or connect one from the Reverse API Lab.`);
+	return null;
+}
+
+export async function loadConnector(ctx: any, workspaceId: string, provider: string): Promise<Connector> {
+	const conn = await connectorOrEnv(ctx, workspaceId, provider);
+	if (conn) return conn;
+	const hint: Record<string, string> = {
+		deepai: "DeepAI powers images, video and music — paste your DeepAI API key in the Connector Vault (Settings → Connectors).",
+		music: "Music generation needs a key for an audio-capable engine — add it in the Connector Vault (Settings → Connectors).",
+		openai: "Add an OpenAI key in the Connector Vault, or leave the engine on Auto to use the built-in deployment engine.",
+		anthropic: "Add an Anthropic key in the Connector Vault (Settings → Connectors).",
+		gemini: "Add a Google AI Studio key in the Connector Vault (Settings → Connectors)."
+	};
+	throw new ConvexError(hint[provider] ?? `No "${provider}" connector configured. Add a key in the Connector Vault (Settings → Connectors) or connect one from the Reverse API Lab.`);
 }
 
 async function mark(ctx: any, id: string, status: string, lastError?: string) {
@@ -62,15 +81,20 @@ async function mark(ctx: any, id: string, status: string, lastError?: string) {
 export async function chatWithConnector(conn: Connector, messages: ChatMsg[], model: string): Promise<{ text: string; tokens: number }> {
 	const base = (conn.baseUrl && conn.baseUrl.trim()) || DEFAULT_BASES[conn.provider] || DEFAULT_BASES.openai;
 	if (conn.provider === "agnes") {
-		// Agnes AI hub is OpenAI-compatible.
+		// Agnes AI hub is OpenAI-compatible. The hub only accepts its own model ids,
+		// so fall back to a known-good engine when the routed model is foreign.
+		const deploymentEngine = conn.label.includes("deployment engine");
+		const agnesModel = deploymentEngine && !/^agnes-/.test(model) ? "agnes-3.0-flash" : model || "agnes-3.0-flash";
 		const res = await fetch(`${base.replace(/\/$/, "")}/chat/completions`, {
 			method: "POST",
 			headers: { "content-type": "application/json", authorization: `Bearer ${conn.token}` },
-			body: JSON.stringify({ model: model || "gpt-4o-mini", messages, max_tokens: 4096 })
+			body: JSON.stringify({ model: agnesModel, messages, max_tokens: 4096 })
 		});
-		if (!res.ok) throw new Error(`Agnes AI failed (${res.status}): ${(await res.text()).slice(0, 300)}`);
+		if (!res.ok) throw new ConvexError(`Agnes AI failed (${res.status}): ${(await res.text()).slice(0, 300)}`);
 		const data = await res.json();
-		return { text: data.choices?.[0]?.message?.content ?? "", tokens: data.usage?.total_tokens ?? 0 };
+		const text = data.choices?.[0]?.message?.content ?? "";
+		if (!text.trim()) throw new ConvexError("The engine returned an empty answer — try again or pick another model.");
+		return { text, tokens: data.usage?.total_tokens ?? 0 };
 	}
 	if (conn.provider === "deepai") {
 		// DeepAI chat is a single-turn style endpoint; flatten the transcript.
@@ -80,7 +104,7 @@ export async function chatWithConnector(conn: Connector, messages: ChatMsg[], mo
 			headers: { "content-type": "application/json", "api-key": conn.token },
 			body: JSON.stringify({ text })
 		});
-		if (!res.ok) throw new Error(`DeepAI chat failed (${res.status}): ${(await res.text()).slice(0, 300)}`);
+		if (!res.ok) throw new ConvexError(`DeepAI chat failed (${res.status}): ${(await res.text()).slice(0, 300)}`);
 		const data = await res.json();
 		return { text: data.reply ?? data.output ?? "", tokens: data.total ?? 0 };
 	}
@@ -92,7 +116,7 @@ export async function chatWithConnector(conn: Connector, messages: ChatMsg[], mo
 			headers: { "content-type": "application/json", "x-api-key": conn.token, "anthropic-version": "2023-06-01" },
 			body: JSON.stringify({ model: model || "claude-haiku-4-5", max_tokens: 4096, system: system || undefined, messages: rest.map((m) => ({ role: m.role, content: m.content })) })
 		});
-		if (!res.ok) throw new Error(`Anthropic failed (${res.status}): ${(await res.text()).slice(0, 300)}`);
+		if (!res.ok) throw new ConvexError(`Anthropic failed (${res.status}): ${(await res.text()).slice(0, 300)}`);
 		const data = await res.json();
 		return { text: (data.content ?? []).map((c: any) => c.text ?? "").join(""), tokens: data.usage?.output_tokens ?? 0 };
 	}
@@ -105,7 +129,7 @@ export async function chatWithConnector(conn: Connector, messages: ChatMsg[], mo
 			headers: { "content-type": "application/json" },
 			body: JSON.stringify({ contents, systemInstruction: sys ? { parts: [{ text: sys }] } : undefined })
 		});
-		if (!res.ok) throw new Error(`Gemini failed (${res.status}): ${(await res.text()).slice(0, 300)}`);
+		if (!res.ok) throw new ConvexError(`Gemini failed (${res.status}): ${(await res.text()).slice(0, 300)}`);
 		const data = await res.json();
 		const text = (data.candidates?.[0]?.content?.parts ?? []).map((p: any) => p.text ?? "").join("");
 		return { text, tokens: data.usageMetadata?.totalTokenCount ?? 0 };
@@ -116,7 +140,7 @@ export async function chatWithConnector(conn: Connector, messages: ChatMsg[], mo
 		headers: { "content-type": "application/json", authorization: `Bearer ${conn.token}` },
 		body: JSON.stringify({ model: model || "gpt-4o-mini", messages, max_tokens: 4096 })
 	});
-	if (!res.ok) throw new Error(`Chat failed (${res.status}): ${(await res.text()).slice(0, 300)}`);
+	if (!res.ok) throw new ConvexError(`Chat failed (${res.status}): ${(await res.text()).slice(0, 300)}`);
 	const data = await res.json();
 	return { text: data.choices?.[0]?.message?.content ?? "", tokens: data.usage?.total_tokens ?? 0 };
 }
@@ -177,7 +201,11 @@ async function deepaiGenerate(conn: Connector, endpoint: string, fields: Record<
 		headers: { "api-key": conn.token },
 		body: form
 	});
-	if (!res.ok) throw new Error(`DeepAI ${endpoint} failed (${res.status}): ${(await res.text()).slice(0, 300)}`);
+	if (!res.ok) {
+		const detail = (await res.text()).slice(0, 300);
+		if (res.status === 401 || res.status === 403) throw new ConvexError("DeepAI rejected that API key. Update it in the Connector Vault, then try again.");
+		throw new ConvexError(`DeepAI ${endpoint} failed (${res.status}). ${detail.replace(/<[^>]+>/g, " ").slice(0, 200)}`);
+	}
 	const data = await res.json();
 	return { outputUrl: data.output_url ?? data.output?.[0], raw: data };
 }
@@ -232,7 +260,7 @@ export const generateMusic = action({
 			const form = new FormData();
 			form.append("text", `${args.prompt}${args.genre ? `. Genre: ${args.genre}` : ""}`);
 			const res = await fetch(`${base}/api/text-to-music`, { method: "POST", headers: { "api-key": conn.token }, body: form });
-			if (!res.ok) throw new Error(`Music API failed (${res.status}): ${(await res.text()).slice(0, 300)}`);
+			if (!res.ok) throw new ConvexError(`Music engine failed (${res.status}). Check the key and endpoint in the Connector Vault.`);
 			const data = await res.json();
 			await mark(ctx, conn._id, "ok");
 			await ctx.runMutation(internal.usage.record, { workspaceId: args.workspaceId, module: "music", action: "generate", provider: "music", ok: true, ms: Date.now() - start });

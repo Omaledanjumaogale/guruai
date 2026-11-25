@@ -1,7 +1,7 @@
 import { v } from "convex/values";
 import { action } from "./_generated/server";
 import { internal } from "./_generated/api";
-import { chatWithConnector } from "./ai";
+import { chatWithConnector, loadConnector, connectorOrEnv } from "./ai";
 import type { Id } from "./_generated/dataModel";
 
 /** Agents — harmonized with Lindy: multi-step agent workflows executed server-side with a full run log. */
@@ -51,8 +51,7 @@ async function runStep(ctx: any, workspaceId: string, step: any, carry: string):
 	const cfg = step.config ?? {};
 	switch (step.type) {
 		case "prompt": {
-			const conn = await ctx.runQuery(internal.connectors.findForProvider, { workspaceId, provider: cfg.provider ?? "openai" });
-			if (!conn) throw new Error(`No "${cfg.provider ?? "openai"}" connector for the AI step.`);
+			const conn = await loadConnector(ctx, workspaceId, cfg.provider ?? "openai");
 			const out = await chatWithConnector(conn as any, [
 				{ role: "system", content: cfg.system ?? "You are a capable enterprise assistant. Be concise and useful." },
 				{ role: "user", content: (cfg.prompt ?? "{input}").replace(/\{input\}/g, carry || "Nothing provided") }
@@ -60,8 +59,7 @@ async function runStep(ctx: any, workspaceId: string, step: any, carry: string):
 			return out.text;
 		}
 		case "humanize": {
-			const conn = await ctx.runQuery(internal.connectors.findForProvider, { workspaceId, provider: cfg.provider ?? "openai" });
-			if (!conn) throw new Error(`No "${cfg.provider ?? "openai"}" connector for the humanize step.`);
+			const conn = await loadConnector(ctx, workspaceId, cfg.provider ?? "openai");
 			const out = await chatWithConnector(conn as any, [
 				{ role: "system", content: "Rewrite the text so it reads naturally human-written. Output only the rewritten text." },
 				{ role: "user", content: carry || cfg.text || "Nothing to humanize." }

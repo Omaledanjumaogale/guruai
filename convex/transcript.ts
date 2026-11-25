@@ -1,7 +1,7 @@
-import { v } from "convex/values";
+import { v, ConvexError } from "convex/values";
 import { action } from "./_generated/server";
 import { internal } from "./_generated/api";
-import { chatWithConnector } from "./ai";
+import { chatWithConnector, loadConnector, connectorOrEnv } from "./ai";
 import type { Id } from "./_generated/dataModel";
 
 /** Transcript — harmonized with youtubetotranscript.com: fetch YouTube captions and summarize. */
@@ -40,42 +40,99 @@ function parseTimedtext(xml: string): { segments: { start: number; text: string 
 	return { segments, text: segments.map((s) => s.text).join(" ").replace(/\s+/g, " ") };
 }
 
+const UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36";
+
+type Seg = { start: number; text: string };
+
+/** Read caption tracks from the watch page and pull YouTube's own json3 captions. */
+async function fromPlayerResponse(videoId: string, lang: string): Promise<{ segments: Seg[]; text: string } | null> {
+	try {
+		const res = await fetch(`https://www.youtube.com/watch?v=${videoId}&hl=${lang}&gl=US&has_verified=1&bpctr=9999999999`, {
+			headers: {
+				"User-Agent": UA,
+				"Accept-Language": `${lang},en;q=0.8`,
+				// Consent + age gates otherwise redirect datacenter IPs to an interstitial page.
+				Cookie: "CONSENT=YES+cb.20240101-00-p0.en+FX+000; SOCS=CAI; PREF=hl=en&gl=US"
+			}
+		});
+		if (!res.ok) return null;
+		const html = await res.text();
+		if (!html.includes("timedtext")) return null;
+		// YouTube embeds its player JSON inside a JS string, so quotes/ampersands arrive escaped.
+		const decoded = html.replace(/\\"/g, '"').replace(/\\u0026/g, "&").replace(/&amp;/g, "&");
+		const urls = [...decoded.matchAll(/"baseUrl":"(https:\/\/www\.youtube\.com\/api\/timedtext[^"]+)"/g)].map((m) => m[1]);
+		if (urls.length === 0) return null;
+		const pick = urls.find((u) => /[?&]lang=en/.test(u)) ?? urls[0];
+		const jr = await fetch(`${pick}&fmt=json3`, { headers: { "User-Agent": UA } });
+		if (!jr.ok) return null;
+		const data: any = await jr.json();
+		const segments: Seg[] = (data.events ?? [])
+			.filter((e: any) => Array.isArray(e.segs))
+			.map((e: any) => ({
+				start: (e.tStartMs ?? 0) / 1000,
+				text: e.segs.map((s: any) => s.utf8 ?? "").join("").replace(/\s+/g, " ").trim()
+			}))
+			.filter((s: Seg) => s.text.length > 0);
+		if (segments.length === 0) return null;
+		return { segments, text: segments.map((s) => s.text).join(" ").replace(/\s+/g, " ") };
+	} catch {
+		return null;
+	}
+}
+
 export const fetchTranscript = action({
 	args: { workspaceId: v.id("workspaces"), url: v.string(), language: v.optional(v.string()) },
 	handler: async (ctx, { workspaceId, url, language }) => {
 		const videoId = extractVideoId(url);
-		if (!videoId) throw new Error("Could not read a YouTube video id from that input. Paste a full youtube.com/youtu.be URL or an 11-character video id.");
+		if (!videoId) throw new ConvexError("Could not read a YouTube video id from that input. Paste a full youtube.com/youtu.be URL or an 11-character video id.");
 		const lang = language || "en";
 
-		// Attempt the timedtext endpoints (several shapes; some videos restrict captions).
-		const candidates = [
-			`https://www.youtube.com/api/timedtext?v=${videoId}&lang=${lang}&fmt=vtt`,
-			`https://www.youtube.com/api/timedtext?v=${videoId}&lang=${lang}`,
-			`https://video.google.com/timedtext?lang=${lang}&v=${videoId}`
-		];
-		let parsed: { segments: { start: number; text: string }[]; text: string } | null = null;
-		let used = "";
-		for (const endpoint of candidates) {
-			try {
-				const res = await fetch(endpoint, { headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)" } });
-				if (!res.ok) continue;
-				const body = await res.text();
-				if (!body || body.length < 40) continue;
-				const p = parseTimedtext(body.includes("<transcript") || body.includes("<text") ? body : body.replace(/WEBVTT[\s\S]*?\n\n/, "").replace(/-->[\s\S]*?\n/g, "").includes("<") ? body : vttToXml(body));
-				if (p.text.length > 60) {
-					parsed = p;
-					used = endpoint;
-					break;
+		let parsed = await fromPlayerResponse(videoId, lang);
+		let used = parsed ? "player-response/json3" : "";
+
+		// Fallback: the public timedtext endpoints (some videos serve captions there directly).
+		if (!parsed) {
+			const candidates = [
+				`https://www.youtube.com/api/timedtext?v=${videoId}&lang=${lang}&fmt=vtt`,
+				`https://www.youtube.com/api/timedtext?v=${videoId}&lang=${lang}`,
+				`https://www.youtube.com/api/timedtext?v=${videoId}&lang=en&fmt=json3`,
+				`https://video.google.com/timedtext?lang=${lang}&v=${videoId}`
+			];
+			for (const endpoint of candidates) {
+				try {
+					const res = await fetch(endpoint, { headers: { "User-Agent": UA } });
+					if (!res.ok) continue;
+					const body = await res.text();
+					if (!body || body.length < 40) continue;
+					if (body.trimStart().startsWith("{")) {
+						const data: any = JSON.parse(body);
+						const segments: Seg[] = (data.events ?? [])
+							.filter((e: any) => Array.isArray(e.segs))
+							.map((e: any) => ({ start: (e.tStartMs ?? 0) / 1000, text: e.segs.map((s: any) => s.utf8 ?? "").join("").trim() }))
+							.filter((s: Seg) => s.text);
+						if (segments.length > 0) {
+							parsed = { segments, text: segments.map((s) => s.text).join(" ").replace(/\s+/g, " ") };
+							used = endpoint;
+							break;
+						}
+						continue;
+					}
+					const p = parseTimedtext(body.includes("<transcript") || body.includes("<text") ? body : vttToXml(body));
+					if (p.text.length > 60) {
+						parsed = p;
+						used = endpoint;
+						break;
+					}
+				} catch {
+					continue;
 				}
-			} catch {
-				continue;
 			}
 		}
 		if (!parsed) {
-			throw new Error("No captions available for this video through the public timedtext endpoints. You can paste the transcript manually — the module stores, formats and summarizes pasted transcripts too.");
+			throw new ConvexError("YouTube returned no captions for this video. Captions may be disabled, or YouTube is blocking the fetch from our servers — paste the transcript text instead; this module also stores, searches and summarizes pasted transcripts.");
 		}
 		const titleRes = await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`).catch(() => null);
-		const title = titleRes && titleRes.ok ? (await titleRes.json()).title ?? videoId : videoId;
+		const title = titleRes && titleRes.ok ? ((await titleRes.json()).title ?? videoId) : videoId;
 		await ctx.runMutation(internal.usage.record, { workspaceId, module: "transcript", action: "fetch", ok: true });
 		return { videoId, url: `https://www.youtube.com/watch?v=${videoId}`, title, language: lang, content: parsed.text, segments: parsed.segments, via: used };
 	}
@@ -101,8 +158,7 @@ function vttToXml(vtt: string): string {
 export const summarizeTranscript = action({
 	args: { workspaceId: v.id("workspaces"), content: v.string(), provider: v.optional(v.string()), model: v.optional(v.string()) },
 	handler: async (ctx, { workspaceId, content, provider, model }) => {
-		const conn = await ctx.runQuery(internal.connectors.findForProvider, { workspaceId, provider: provider ?? "openai" });
-		if (!conn) throw new Error("Add a chat connector first to summarize.");
+		const conn = await loadConnector(ctx, workspaceId, provider ?? "openai");
 		const out = await chatWithConnector(conn as any, [
 			{ role: "system", content: "Summarize the transcript into: 1) a 3-sentence abstract, 2) five key takeaways as bullet points, 3) action items if any. Plain markdown." },
 			{ role: "user", content: content.slice(0, 14000) }

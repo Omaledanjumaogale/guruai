@@ -11,7 +11,7 @@
 		rejected: { color: "bg-slate-500", label: "Rejected" },
 		error_run: { color: "bg-rose-400", label: "Failed" }
 	};
-	const s = map[status] ?? { color: "bg-slate-500", label: status };
+	const s = $derived(map[status] ?? { color: "bg-slate-500", label: status });
 </script>
 
 <span class="inline-flex items-center gap-1.5 rounded-full bg-ink-800/80 px-2.5 py-1 text-[11px] font-medium text-slate-300">

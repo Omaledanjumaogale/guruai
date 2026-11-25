@@ -133,7 +133,7 @@
 			{/each}
 		{/if}
 		{#if activeRun}
-			<p class="text-[11px] text-indigo-300">Run {activeRun.slice(-6)} — refresh to see live updates.</p>
+			<p class="text-[11px] text-indigo-300">Latest run {activeRun.slice(-6)} — status updates live.</p>
 		{/if}
 	</aside>
 </div>
