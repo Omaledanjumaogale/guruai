@@ -10,4 +10,5 @@ dist/
 
 # local dev artifacts
 preview*.log
-*.tsbuildinfotmp/
+*.tsbuildinfo
+tmp/
