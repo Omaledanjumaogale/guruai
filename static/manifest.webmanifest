@@ -1,0 +1,22 @@
+{
+	"name": "Guru AI — Enterprise AI Workspace",
+	"short_name": "Guru AI",
+	"description": "The harmonized enterprise AI workspace: chat, generation studio, humanizer, visuals, keyword intelligence, converters, transcripts, notes, agents and a Reverse API Lab.",
+	"start_url": "/",
+	"scope": "/",
+	"display": "standalone",
+	"orientation": "any",
+	"background_color": "#0b1020",
+	"theme_color": "#0b1020",
+	"categories": ["productivity", "utilities", "developer"],
+	"icons": [
+		{ "src": "/icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+		{ "src": "/icons/maskable.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+	],
+	"shortcuts": [
+		{ "name": "Chat", "url": "/chat" },
+		{ "name": "Image Studio", "url": "/images" },
+		{ "name": "Reverse API Lab", "url": "/reverse-api" },
+		{ "name": "Notes", "url": "/notes" }
+	]
+}

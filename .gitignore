@@ -1,0 +1,13 @@
+node_modules/
+build/
+.svelte-kit/
+dist/
+.wrangler/
+.env
+.env.local
+*.local
+.DS_Store
+
+# local dev artifacts
+preview*.log
+*.tsbuildinfo

@@ -1,0 +1,8 @@
+name = "guru-ai"
+compatibility_date = "2025-01-01"
+pages_build_output_dir = "build"
+
+# Build-time env consumed by Vite. Replace after `npx convex deploy` prints your URL,
+# or set VITE_CONVEX_URL in the Cloudflare Pages dashboard.
+[vars]
+VITE_APP_NAME = "Guru AI"
