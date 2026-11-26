@@ -6,6 +6,8 @@ export type Account = { email: string; name: string; role: string; provider: str
 const TOKEN_KEY = "guru.auth.token";
 
 export const account = writable<Account | null>(null);
+/** Reactive copy of the bearer token so live queries re-subscribe on sign-in. */
+export const session = writable<string>(typeof localStorage === "undefined" ? "" : (localStorage.getItem("guru.auth.token") ?? ""));
 export const authLoading = writable(true);
 /** Surfaced on the sign-in screen so failures are never silent. */
 export const authError = writable<string>("");
@@ -43,6 +45,7 @@ export function captureOAuthToken(): string | null {
 	const m = window.location.hash.match(/#auth=(gst_[a-f0-9]+)/);
 	if (m) {
 		localStorage.setItem(TOKEN_KEY, m[1]);
+		session.set(m[1]);
 		history.replaceState(null, "", window.location.pathname + window.location.search);
 		return m[1];
 	}
@@ -59,8 +62,13 @@ export async function initAuth(): Promise<void> {
 	try {
 		const { qq } = await import("./convex");
 		const acc = await qq<Account | null>("auth.verify", { token });
-		if (acc) account.set(acc);
-		else localStorage.removeItem(TOKEN_KEY);
+		if (acc) {
+			account.set(acc);
+			session.set(token);
+		} else {
+			localStorage.removeItem(TOKEN_KEY);
+			session.set("");
+		}
 	} catch {
 		/* offline — keep token, retry later */
 	}
@@ -69,6 +77,7 @@ export async function initAuth(): Promise<void> {
 
 async function storeSession(res: { token: string; account?: Account; email?: string; role?: string }): Promise<Account> {
 	localStorage.setItem(TOKEN_KEY, res.token);
+	session.set(res.token);
 	const acc: Account =
 		res.account ?? { email: res.email ?? "", name: "Super Admin", role: res.role ?? "admin", provider: "password" };
 	account.set(acc);
@@ -112,6 +121,7 @@ export async function logout(): Promise<void> {
 	}
 	localStorage.removeItem(TOKEN_KEY);
 	account.set(null);
+	session.set("");
 }
 
 export function startOAuth(provider: "google" | "github") {

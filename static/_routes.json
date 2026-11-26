@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "description": "Guru AI is a fully static SvelteKit shell. Convex handles all data and AI calls from the browser, so no request needs a Pages Function.",
+  "include": [],
+  "exclude": [
+    "/*"
+  ]
+}

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import PageHeader from "$lib/components/PageHeader.svelte";
+	import BrandBanner from "$lib/components/BrandBanner.svelte";
 	import MarkdownLite from "$lib/components/MarkdownLite.svelte";
 	import { workspaceId, toastOk, toastErr } from "$lib/stores";
 	import { gq, ax, mx } from "$lib/convex";
@@ -104,6 +105,8 @@
 </script>
 
 <PageHeader title="Transcripts" blurb="YouTube video → searchable transcript with timestamps and optional AI summary. Harmonized from youtubetotranscript.com." />
+
+<BrandBanner name="transcript" />
 
 <div class="guru-card mb-4 p-5">
 	<form class="flex flex-wrap items-end gap-3" onsubmit={(e) => { e.preventDefault(); fetchIt(); }}>

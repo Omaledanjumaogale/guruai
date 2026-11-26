@@ -10,7 +10,7 @@
 		registerAccount,
 		startOAuth
 	} from "$lib/auth";
-	import { convexReady } from "$lib/convex";
+	import { convexReady, mx } from "$lib/convex";
 	import { toastOk } from "$lib/stores";
 
 	type Mode = "signin" | "signup";
@@ -23,7 +23,7 @@
 	let busy = $state(false);
 	let error = $state("");
 
-	const next = $derived(page.url.searchParams.get("next") ?? "/");
+	const next = $derived(page.url.searchParams.get("next") ?? "/home");
 	const acc = $derived($account);
 	const valid = $derived(
 		/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email.trim()) &&
@@ -54,6 +54,14 @@
 			} else {
 				await registerAccount(email, password, name);
 				toastOk("Your Guru AI account is ready");
+			}
+			// Idempotent onboarding: policy defaults, then the member's own profile.
+			try {
+				await mx("rbac.bootstrap", {});
+				const token = localStorage.getItem("guru.auth.token") ?? "";
+				if (token) await mx("profiles.ensureMine", { token });
+			} catch {
+				/* the shell retries onboarding lazily */
 			}
 			await goto(next, { replaceState: true });
 		} catch (err) {

@@ -1,0 +1,52 @@
+[
+  {
+    "name": "promo-slide-01",
+    "alt": "A creative professional orchestrating chat, imagery and research in one luminous workspace",
+    "prompt": "Wide cinematic view of a confident creative director standing at a curved glass desk in a dark modern studio at dusk, surrounded by a calm arranged arc of floating translucent glass panels that contain only abstract gradients, soft waveforms and blurred photographic thumbnails — absolutely no readable text, no typography, no captions, no letters, no numbers, no logos, no watermarks anywhere in the scene. Warm practical lamps behind, indigo and cyan light reflecting on the glass desk. Photorealistic premium editorial photography, cinematic lighting, deep charcoal environment, shallow depth of field, high resolution."
+  },
+  {
+    "name": "promo-slide-02",
+    "alt": "A research analyst reading clustered audience questions on a large wall display",
+    "prompt": "Editorial photograph of a research analyst in a charcoal knit sweater studying a large dimly lit wall display filled with softly glowing interconnected question clusters and keyword nodes, one hand raised toward a node, notebook on the desk, teal and violet glow on the face, city night through the window. Photorealistic premium editorial photography, cinematic lighting, deep charcoal and warm neutral environment with subtle indigo and cyan accents, rich environmental detail, natural authentic people, sophisticated composition, shallow depth of field, high resolution, no text, no logos, no watermarks, no UI chrome lettering"
+  },
+  {
+    "name": "promo-slide-03",
+    "alt": "An operations lead watching an automated multi-step workflow complete across connected nodes",
+    "prompt": "Cinematic scene of an operations lead in a modern control room watching a multi-step automated workflow finish: elegant threads of warm light connecting six floating nodes above a matte black table, calm confident posture, reflections of indigo status lights on the surface, evening ambience. Photorealistic premium editorial photography, cinematic lighting, deep charcoal and warm neutral environment with subtle indigo and cyan accents, rich environmental detail, natural authentic people, sophisticated composition, shallow depth of field, high resolution, no text, no logos, no watermarks, no UI chrome lettering"
+  },
+  {
+    "name": "story-customer",
+    "alt": "A founder at dawn juggling scattered tools and browser windows before finding one workspace",
+    "prompt": "Intimate documentary photograph of a founder at dawn in a small home office, seated among scattered devices and many open windows on a laptop, tired but determined expression, cool blue morning light through blinds, papers and a cold coffee cup on the desk, a sense of too many tools and fragmented work. Photorealistic premium editorial photography, cinematic lighting, deep charcoal and warm neutral environment with subtle indigo and cyan accents, rich environmental detail, natural authentic people, sophisticated composition, shallow depth of field, high resolution, no text, no logos, no watermarks, no UI chrome lettering"
+  },
+  {
+    "name": "story-discovery",
+    "alt": "The founder discovering a single calm AI workspace on screen, morning light warming the room",
+    "prompt": "Documentary photograph of the same founder leaning forward with a quiet smile as a single clean luminous workspace glows on the laptop screen, the room now bathed in warm golden morning light, the other devices pushed aside, a moment of relief and clarity, shallow focus on hands and screen light. Photorealistic premium editorial photography, cinematic lighting, deep charcoal and warm neutral environment with subtle indigo and cyan accents, rich environmental detail, natural authentic people, sophisticated composition, shallow depth of field, high resolution, no text, no logos, no watermarks, no UI chrome lettering"
+  },
+  {
+    "name": "story-guide",
+    "alt": "A luminous guided path leading the founder through a sequence of creative tasks",
+    "prompt": "Artistic conceptual photograph of a person walking beside a softly glowing pathway of light that curves through a dark minimal gallery space, each bend marked by a floating translucent panel showing abstract chart, image and text shapes, warm guidance light ahead, indigo ambience behind, hopeful forward motion. Photorealistic premium editorial photography, cinematic lighting, deep charcoal and warm neutral environment with subtle indigo and cyan accents, rich environmental detail, natural authentic people, sophisticated composition, shallow depth of field, high resolution, no text, no logos, no watermarks, no UI chrome lettering"
+  },
+  {
+    "name": "feature-learning",
+    "alt": "A writer refining a draft with natural human voice in a warm study",
+    "prompt": "Warm editorial portrait of a writer in a book-lined study, editing a document on a laptop with a calm satisfied expression, handwritten notes and a fountain pen beside the keyboard, late afternoon window light, muted greens and warm wood, human craftsmanship and natural voice. Photorealistic premium editorial photography, cinematic lighting, deep charcoal and warm neutral environment with subtle indigo and cyan accents, rich environmental detail, natural authentic people, sophisticated composition, shallow depth of field, high resolution, no text, no logos, no watermarks, no UI chrome lettering"
+  },
+  {
+    "name": "feature-workflow",
+    "alt": "A small team mapping an automated content workflow on a glass wall",
+    "prompt": "Photograph of two colleagues mapping a content workflow on a glass wall with translucent sticky notes and connector lines, one pointing while the other takes notes, modern loft office with concrete and warm pendant lights, collaborative energy, indigo accent reflections. Photorealistic premium editorial photography, cinematic lighting, deep charcoal and warm neutral environment with subtle indigo and cyan accents, rich environmental detail, natural authentic people, sophisticated composition, shallow depth of field, high resolution, no text, no logos, no watermarks, no UI chrome lettering"
+  },
+  {
+    "name": "feature-community",
+    "alt": "A diverse product community sharing work around a table in a warm studio",
+    "prompt": "Documentary photograph of a diverse small community of makers and analysts gathered around a long wooden table sharing laptops and printed visuals, genuine conversation and laughter, warm hanging lights, plants and brick wall, evening workshop atmosphere, inclusive and human. Photorealistic premium editorial photography, cinematic lighting, deep charcoal and warm neutral environment with subtle indigo and cyan accents, rich environmental detail, natural authentic people, sophisticated composition, shallow depth of field, high resolution, no text, no logos, no watermarks, no UI chrome lettering"
+  },
+  {
+    "name": "dashboard-ecosystem",
+    "alt": "An abstract ecosystem of floating translucent panels representing connected AI modules",
+    "prompt": "Abstract architectural render of a dark premium ecosystem: a central translucent cube glowing soft indigo surrounded by nine floating frosted glass panels arranged in a spiral, each panel containing abstract waveforms, image thumbnails and data curves, cyan rim light, subtle mist, depth and order, no text, no logos."
+  }
+]

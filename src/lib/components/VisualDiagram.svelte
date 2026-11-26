@@ -18,6 +18,13 @@
 		return (spec?.nodes ?? []).find((n: any) => n.id === id);
 	}
 
+	function midPoint(e: any) {
+		const a = nodePos(e.from);
+		const b = nodePos(e.to);
+		if (!a || !b) return { x: 0, y: 0 };
+		return { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 - 30 };
+	}
+
 	function edgePath(e: any): string {
 		const a = nodePos(e.from);
 		const b = nodePos(e.to);
@@ -43,7 +50,8 @@
 				{#if edgePath(e)}
 					<path d={edgePath(e)} fill="none" stroke="#4a5a8a" stroke-width="1.6" marker-end="url(#arrow)"></path>
 					{#if e.label}
-						<text x={(nodePos(e.from)?.x ?? 0 + nodePos(e.to)?.x ?? 0) / 2} y={(nodePos(e.from)?.y ?? 0 + nodePos(e.to)?.y ?? 0) / 2 - 30} text-anchor="middle" fill="#8fa0c8" font-size="10">{e.label}</text>
+						{@const mid = midPoint(e)}
+						<text x={mid.x} y={mid.y} text-anchor="middle" fill="#8fa0c8" font-size="10">{e.label}</text>
 					{/if}
 				{/if}
 			{/each}

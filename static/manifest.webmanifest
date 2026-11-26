@@ -1,22 +1,56 @@
 {
-	"name": "Guru AI — Enterprise AI Workspace",
-	"short_name": "Guru AI",
-	"description": "The harmonized enterprise AI workspace: chat, generation studio, humanizer, visuals, keyword intelligence, converters, transcripts, notes, agents and a Reverse API Lab.",
-	"start_url": "/",
-	"scope": "/",
-	"display": "standalone",
-	"orientation": "any",
-	"background_color": "#0b1020",
-	"theme_color": "#0b1020",
-	"categories": ["productivity", "utilities", "developer"],
-	"icons": [
-		{ "src": "/icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
-		{ "src": "/icons/maskable.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
-	],
-	"shortcuts": [
-		{ "name": "Chat", "url": "/chat" },
-		{ "name": "Image Studio", "url": "/images" },
-		{ "name": "Reverse API Lab", "url": "/reverse-api" },
-		{ "name": "Notes", "url": "/notes" }
-	]
+  "name": "Guru AI — Enterprise AI Workspace",
+  "short_name": "Guru AI",
+  "description": "Chat, studios, humanizer, keyword intelligence, converters, transcripts, notes, agents and a Reverse API Lab in one harmonized workspace.",
+  "start_url": "/home",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": [
+    "window-controls-overlay",
+    "standalone"
+  ],
+  "orientation": "any",
+  "background_color": "#050505",
+  "theme_color": "#050505",
+  "categories": [
+    "productivity",
+    "utilities",
+    "developer"
+  ],
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/maskable.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Chat",
+      "url": "/chat",
+      "description": "Multi-model AI chat"
+    },
+    {
+      "name": "Image Studio",
+      "url": "/images",
+      "description": "Text-to-image generation"
+    },
+    {
+      "name": "Notes",
+      "url": "/notes",
+      "description": "Pinned workspace notes"
+    },
+    {
+      "name": "Messages",
+      "url": "/inbox",
+      "description": "Private support conversations"
+    }
+  ]
 }

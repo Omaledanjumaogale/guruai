@@ -1,6 +1,9 @@
 <script lang="ts">
 	import GeneratorStudio from "$lib/components/GeneratorStudio.svelte";
+	import BrandBanner from "$lib/components/BrandBanner.svelte";
 </script>
+
+<BrandBanner name="images" />
 
 <GeneratorStudio
 	kind="image"

@@ -3,7 +3,9 @@
 	 * Tiny, dependency-free markdown renderer: fenced code, headings, lists,
 	 * bold/italic/inline code/links. Good enough for chat output.
 	 */
-	let { content } = $props();
+	import type { Snippet } from "svelte";
+
+	let { content, codeaction }: { content: string; codeaction?: Snippet<[string]> } = $props();
 
 	function esc(s: string): string {
 		return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -70,7 +72,7 @@
 			<div class="my-2 overflow-hidden rounded-lg border border-indigo-500/20">
 				<div class="flex items-center justify-between bg-ink-800/80 px-3 py-1.5">
 					<span class="font-mono text-[11px] uppercase tracking-wider text-slate-400">{b.lang}</span>
-					<slot name="codeaction" code={b.body} />
+					{@render codeaction?.(b.body)}
 				</div>
 				<pre class="overflow-x-auto bg-ink-950/80 p-3 font-mono text-[12.5px] leading-relaxed text-cyan-100">{b.body}</pre>
 			</div>

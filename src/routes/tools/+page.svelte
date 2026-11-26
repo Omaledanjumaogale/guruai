@@ -59,7 +59,7 @@
 		</button>
 	</div>
 	<div class="guru-card p-5">
-		<label class="guru-label">Result</label>
+		<p class="guru-label">Result</p>
 		{#if output}
 			<div class="min-h-[220px] whitespace-pre-wrap rounded-lg bg-ink-950/60 p-3 text-[14px] leading-relaxed text-slate-200">{output}</div>
 		{:else}

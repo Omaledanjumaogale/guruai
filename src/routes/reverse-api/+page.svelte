@@ -207,7 +207,7 @@
 		</div>
 
 		<div class="grid gap-3 md:grid-cols-2">
-			{#each (candidates ?? []).filter((c) => c.status === "pending") as c (c._id)}
+			{#each (candidates ?? []).filter((c: any) => c.status === "pending") as c (c._id)}
 				<div class="guru-card p-4">
 					<div class="flex items-start justify-between gap-2">
 						<div>
@@ -227,11 +227,11 @@
 			{/each}
 		</div>
 
-		{#if (candidates ?? []).some((c) => c.status !== "pending")}
+		{#if (candidates ?? []).some((c: any) => c.status !== "pending")}
 			<details class="guru-card p-4">
 				<summary class="cursor-pointer text-xs font-semibold uppercase tracking-wider text-slate-400">Reviewed candidates</summary>
 				<ul class="mt-2 space-y-1 text-xs">
-					{#each (candidates ?? []).filter((c) => c.status !== "pending") as c (c._id)}
+					{#each (candidates ?? []).filter((c: any) => c.status !== "pending") as c (c._id)}
 						<li class="flex items-center justify-between text-slate-400"><span>{c.provider} · {c.keyEnvName} · {c.sourceLabel}</span><StatusDot status={c.status} /></li>
 					{/each}
 				</ul>

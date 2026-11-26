@@ -203,6 +203,14 @@ export const removeUser = action({
 		if (target === superAdminEmail()) throw new ConvexError("The configured super-admin account cannot be removed.");
 		const removed = await ctx.runMutation(internal.authInternal.deleteUserByEmail, { email: target });
 		if (!removed) throw new ConvexError("No account with that email address.");
+		await ctx.runMutation(internal.audit.logInternal, {
+			actorEmail: me.email,
+			action: "account.removed",
+			targetType: "user",
+			targetId: target,
+			outcome: "success",
+			detail: "Removed from the Super Admin Console; sessions revoked."
+		});
 		return { removed: target };
 	}
 });

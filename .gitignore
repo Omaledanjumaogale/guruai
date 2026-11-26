@@ -9,6 +9,7 @@ dist/
 .DS_Store
 
 # local dev artifacts
+*.log
 preview*.log
 *.tsbuildinfo
 tmp/

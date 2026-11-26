@@ -1,0 +1,293 @@
+{
+  "app": "Guru AI",
+  "model": "agnes-image-2.1-flash",
+  "generatedAt": "2026-11-25T23:56:28.615Z",
+  "requiredWebp": [
+    "/images/generated/dashboard-ecosystem.webp",
+    "/images/generated/feature-community.webp",
+    "/images/generated/feature-learning.webp",
+    "/images/generated/feature-workflow.webp",
+    "/images/generated/promo-slide-01.webp",
+    "/images/generated/promo-slide-02.webp",
+    "/images/generated/promo-slide-03.webp",
+    "/images/generated/story-customer.webp",
+    "/images/generated/story-discovery.webp",
+    "/images/generated/story-guide.webp"
+  ],
+  "assets": [
+    {
+      "name": "dashboard-ecosystem",
+      "alt": "An abstract ecosystem of floating translucent panels representing connected AI modules",
+      "prompt": "Abstract architectural render of a dark premium ecosystem: a central translucent cube glowing soft indigo surrounded by nine floating frosted glass panels arranged in a spiral, each panel containing abstract waveforms, image thumbnails and data curves, cyan rim light, subtle mist, depth and order, no text, no logos.",
+      "section": "Landing — story outcome: the ecosystem",
+      "route": "/",
+      "path": "/images/generated/dashboard-ecosystem.webp",
+      "width": 1536,
+      "height": 864,
+      "format": "image/webp",
+      "bytes": 59122,
+      "sha256": "9c133aab4436f137cc83bdf1092b610d82d7fd5149bbc24c4aacfcf62848a9eb",
+      "derivatives": [
+        {
+          "path": "/images/responsive/dashboard-ecosystem-1024.webp",
+          "width": 1024,
+          "height": 576,
+          "bytes": 30756
+        },
+        {
+          "path": "/images/responsive/dashboard-ecosystem-640.webp",
+          "width": 640,
+          "height": 360,
+          "bytes": 17378
+        }
+      ]
+    },
+    {
+      "name": "feature-community",
+      "alt": "A diverse product community sharing work around a table in a warm studio",
+      "prompt": "Documentary photograph of a diverse small community of makers and analysts gathered around a long wooden table sharing laptops and printed visuals, genuine conversation and laughter, warm hanging lights, plants and brick wall, evening workshop atmosphere, inclusive and human. Photorealistic premium editorial photography, cinematic lighting, deep charcoal and warm neutral environment with subtle indigo and cyan accents, rich environmental detail, natural authentic people, sophisticated composition, shallow depth of field, high resolution, no text, no logos, no watermarks, no UI chrome lettering",
+      "section": "Landing — feature: community",
+      "route": "/",
+      "path": "/images/generated/feature-community.webp",
+      "width": 1536,
+      "height": 864,
+      "format": "image/webp",
+      "bytes": 109330,
+      "sha256": "a38f84ffcef3298eda1f13946f3b627aee2c9238ac506ce32a873e6059a7b9c8",
+      "derivatives": [
+        {
+          "path": "/images/responsive/feature-community-1024.webp",
+          "width": 1024,
+          "height": 576,
+          "bytes": 56092
+        },
+        {
+          "path": "/images/responsive/feature-community-640.webp",
+          "width": 640,
+          "height": 360,
+          "bytes": 29668
+        }
+      ]
+    },
+    {
+      "name": "feature-learning",
+      "alt": "A writer refining a draft with natural human voice in a warm study",
+      "prompt": "Warm editorial portrait of a writer in a book-lined study, editing a document on a laptop with a calm satisfied expression, handwritten notes and a fountain pen beside the keyboard, late afternoon window light, muted greens and warm wood, human craftsmanship and natural voice. Photorealistic premium editorial photography, cinematic lighting, deep charcoal and warm neutral environment with subtle indigo and cyan accents, rich environmental detail, natural authentic people, sophisticated composition, shallow depth of field, high resolution, no text, no logos, no watermarks, no UI chrome lettering",
+      "section": "Landing — feature: human voice",
+      "route": "/",
+      "path": "/images/generated/feature-learning.webp",
+      "width": 1536,
+      "height": 864,
+      "format": "image/webp",
+      "bytes": 53654,
+      "sha256": "3038f1792676a879ba12ffd82cfe54da9b9531ad3e1fbbf85b144e8e4262e197",
+      "derivatives": [
+        {
+          "path": "/images/responsive/feature-learning-1024.webp",
+          "width": 1024,
+          "height": 576,
+          "bytes": 27622
+        },
+        {
+          "path": "/images/responsive/feature-learning-640.webp",
+          "width": 640,
+          "height": 360,
+          "bytes": 15480
+        }
+      ]
+    },
+    {
+      "name": "feature-workflow",
+      "alt": "A small team mapping an automated content workflow on a glass wall",
+      "prompt": "Photograph of two colleagues mapping a content workflow on a glass wall with translucent sticky notes and connector lines, one pointing while the other takes notes, modern loft office with concrete and warm pendant lights, collaborative energy, indigo accent reflections. Photorealistic premium editorial photography, cinematic lighting, deep charcoal and warm neutral environment with subtle indigo and cyan accents, rich environmental detail, natural authentic people, sophisticated composition, shallow depth of field, high resolution, no text, no logos, no watermarks, no UI chrome lettering",
+      "section": "Landing — feature: workflow automation",
+      "route": "/",
+      "path": "/images/generated/feature-workflow.webp",
+      "width": 1536,
+      "height": 864,
+      "format": "image/webp",
+      "bytes": 61670,
+      "sha256": "7d3ea7d3d6507862e70b682ea96db9fc86fdb49a339c7883a08cd4233f138cc6",
+      "derivatives": [
+        {
+          "path": "/images/responsive/feature-workflow-1024.webp",
+          "width": 1024,
+          "height": 576,
+          "bytes": 32504
+        },
+        {
+          "path": "/images/responsive/feature-workflow-640.webp",
+          "width": 640,
+          "height": 360,
+          "bytes": 18246
+        }
+      ]
+    },
+    {
+      "name": "promo-slide-01",
+      "alt": "A creative professional orchestrating chat, imagery and research in one luminous workspace",
+      "prompt": "Wide cinematic view of a confident creative director standing at a curved glass desk in a dark modern studio at dusk, surrounded by a calm arranged arc of floating translucent glass panels that contain only abstract gradients, soft waveforms and blurred photographic thumbnails — absolutely no readable text, no typography, no captions, no letters, no numbers, no logos, no watermarks anywhere in the scene. Warm practical lamps behind, indigo and cyan light reflecting on the glass desk. Photorealistic premium editorial photography, cinematic lighting, deep charcoal environment, shallow depth of field, high resolution.",
+      "section": "Landing — promotional slider (slide 1)",
+      "route": "/",
+      "path": "/images/generated/promo-slide-01.webp",
+      "width": 1536,
+      "height": 864,
+      "format": "image/webp",
+      "bytes": 38420,
+      "sha256": "d6f78fb4b7cf6b0bbad99bc9c78815f37701524b8f4b0eacc00b958fe418f3a5",
+      "derivatives": [
+        {
+          "path": "/images/responsive/promo-slide-01-1024.webp",
+          "width": 1024,
+          "height": 576,
+          "bytes": 21564
+        },
+        {
+          "path": "/images/responsive/promo-slide-01-640.webp",
+          "width": 640,
+          "height": 360,
+          "bytes": 12506
+        }
+      ]
+    },
+    {
+      "name": "promo-slide-02",
+      "alt": "A research analyst reading clustered audience questions on a large wall display",
+      "prompt": "Editorial photograph of a research analyst in a charcoal knit sweater studying a large dimly lit wall display filled with softly glowing interconnected question clusters and keyword nodes, one hand raised toward a node, notebook on the desk, teal and violet glow on the face, city night through the window. Photorealistic premium editorial photography, cinematic lighting, deep charcoal and warm neutral environment with subtle indigo and cyan accents, rich environmental detail, natural authentic people, sophisticated composition, shallow depth of field, high resolution, no text, no logos, no watermarks, no UI chrome lettering",
+      "section": "Landing — promotional slider (slide 2)",
+      "route": "/",
+      "path": "/images/generated/promo-slide-02.webp",
+      "width": 1536,
+      "height": 864,
+      "format": "image/webp",
+      "bytes": 52266,
+      "sha256": "e56ae284f4a8cff3ffd4f1ab9eec563d7711be085a9ce2042f3d97571fbdb8ff",
+      "derivatives": [
+        {
+          "path": "/images/responsive/promo-slide-02-1024.webp",
+          "width": 1024,
+          "height": 576,
+          "bytes": 26116
+        },
+        {
+          "path": "/images/responsive/promo-slide-02-640.webp",
+          "width": 640,
+          "height": 360,
+          "bytes": 13864
+        }
+      ]
+    },
+    {
+      "name": "promo-slide-03",
+      "alt": "An operations lead watching an automated multi-step workflow complete across connected nodes",
+      "prompt": "Cinematic scene of an operations lead in a modern control room watching a multi-step automated workflow finish: elegant threads of warm light connecting six floating nodes above a matte black table, calm confident posture, reflections of indigo status lights on the surface, evening ambience. Photorealistic premium editorial photography, cinematic lighting, deep charcoal and warm neutral environment with subtle indigo and cyan accents, rich environmental detail, natural authentic people, sophisticated composition, shallow depth of field, high resolution, no text, no logos, no watermarks, no UI chrome lettering",
+      "section": "Landing — promotional slider (slide 3)",
+      "route": "/",
+      "path": "/images/generated/promo-slide-03.webp",
+      "width": 1536,
+      "height": 864,
+      "format": "image/webp",
+      "bytes": 39786,
+      "sha256": "e999bdc98841d85781a842359d460ed7e24814320365aa7b13a734d2944eb6e3",
+      "derivatives": [
+        {
+          "path": "/images/responsive/promo-slide-03-1024.webp",
+          "width": 1024,
+          "height": 576,
+          "bytes": 21752
+        },
+        {
+          "path": "/images/responsive/promo-slide-03-640.webp",
+          "width": 640,
+          "height": 360,
+          "bytes": 12534
+        }
+      ]
+    },
+    {
+      "name": "story-customer",
+      "alt": "A founder at dawn juggling scattered tools and browser windows before finding one workspace",
+      "prompt": "Intimate documentary photograph of a founder at dawn in a small home office, seated among scattered devices and many open windows on a laptop, tired but determined expression, cool blue morning light through blinds, papers and a cold coffee cup on the desk, a sense of too many tools and fragmented work. Photorealistic premium editorial photography, cinematic lighting, deep charcoal and warm neutral environment with subtle indigo and cyan accents, rich environmental detail, natural authentic people, sophisticated composition, shallow depth of field, high resolution, no text, no logos, no watermarks, no UI chrome lettering",
+      "section": "Landing — story: the scattered morning",
+      "route": "/",
+      "path": "/images/generated/story-customer.webp",
+      "width": 1536,
+      "height": 864,
+      "format": "image/webp",
+      "bytes": 56714,
+      "sha256": "942e4bd386c4cbdb8f1f733d79ecbaf5cd2b7dea0992f8f5e4b9193842bdf372",
+      "derivatives": [
+        {
+          "path": "/images/responsive/story-customer-1024.webp",
+          "width": 1024,
+          "height": 576,
+          "bytes": 31090
+        },
+        {
+          "path": "/images/responsive/story-customer-640.webp",
+          "width": 640,
+          "height": 360,
+          "bytes": 17568
+        }
+      ]
+    },
+    {
+      "name": "story-discovery",
+      "alt": "The founder discovering a single calm AI workspace on screen, morning light warming the room",
+      "prompt": "Documentary photograph of the same founder leaning forward with a quiet smile as a single clean luminous workspace glows on the laptop screen, the room now bathed in warm golden morning light, the other devices pushed aside, a moment of relief and clarity, shallow focus on hands and screen light. Photorealistic premium editorial photography, cinematic lighting, deep charcoal and warm neutral environment with subtle indigo and cyan accents, rich environmental detail, natural authentic people, sophisticated composition, shallow depth of field, high resolution, no text, no logos, no watermarks, no UI chrome lettering",
+      "section": "Landing — story: discovery",
+      "route": "/",
+      "path": "/images/generated/story-discovery.webp",
+      "width": 1536,
+      "height": 864,
+      "format": "image/webp",
+      "bytes": 52530,
+      "sha256": "a073487c6ff0198a5e25d623b9c0958e10421d4da7a6ee83d0934b109cb8127b",
+      "derivatives": [
+        {
+          "path": "/images/responsive/story-discovery-1024.webp",
+          "width": 1024,
+          "height": 576,
+          "bytes": 28554
+        },
+        {
+          "path": "/images/responsive/story-discovery-640.webp",
+          "width": 640,
+          "height": 360,
+          "bytes": 15294
+        }
+      ]
+    },
+    {
+      "name": "story-guide",
+      "alt": "A luminous guided path leading the founder through a sequence of creative tasks",
+      "prompt": "Artistic conceptual photograph of a person walking beside a softly glowing pathway of light that curves through a dark minimal gallery space, each bend marked by a floating translucent panel showing abstract chart, image and text shapes, warm guidance light ahead, indigo ambience behind, hopeful forward motion. Photorealistic premium editorial photography, cinematic lighting, deep charcoal and warm neutral environment with subtle indigo and cyan accents, rich environmental detail, natural authentic people, sophisticated composition, shallow depth of field, high resolution, no text, no logos, no watermarks, no UI chrome lettering",
+      "section": "Landing — story: the guided path",
+      "route": "/",
+      "path": "/images/generated/story-guide.webp",
+      "width": 1536,
+      "height": 864,
+      "format": "image/webp",
+      "bytes": 31668,
+      "sha256": "50f830caea0a5a84cd79ae1841c139597e0ece9e47364dfd3736a2efb11e706f",
+      "derivatives": [
+        {
+          "path": "/images/responsive/story-guide-1024.webp",
+          "width": 1024,
+          "height": 576,
+          "bytes": 17148
+        },
+        {
+          "path": "/images/responsive/story-guide-640.webp",
+          "width": 640,
+          "height": 360,
+          "bytes": 9360
+        }
+      ]
+    }
+  ],
+  "heroPreservation": {
+    "note": "No pre-existing hero photographs were present in this repository when the visual upgrade began (static/ contained only the PWA icons). Nothing was replaced or deleted. Recorded 2026-11-25.",
+    "protectedFiles": []
+  }
+}

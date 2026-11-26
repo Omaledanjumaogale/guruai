@@ -90,9 +90,9 @@
 						</span>
 					{/each}
 				</div>
-				{#if runs?.filter((r) => r.agentId === a._id).length}
+				{#if runs?.filter((r: any) => r.agentId === a._id).length}
 					<ul class="mt-3 space-y-1 border-t border-indigo-500/10 pt-2">
-						{#each runs.filter((r) => r.agentId === a._id).slice(0, 3) as r (r._id)}
+						{#each runs.filter((r: any) => r.agentId === a._id).slice(0, 3) as r (r._id)}
 							<li class="flex items-center justify-between text-[11px] text-slate-500">
 								<span>{new Date(r.startedAt).toLocaleString()} · {r.log.length} steps</span>
 								<StatusDot status={r.status} />

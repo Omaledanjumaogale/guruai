@@ -1,5 +1,6 @@
 <script lang="ts">
 	import PageHeader from "$lib/components/PageHeader.svelte";
+	import BrandBanner from "$lib/components/BrandBanner.svelte";
 	import { workspaceId, toastOk, toastErr } from "$lib/stores";
 	import { gq, ax, mx } from "$lib/convex";
 
@@ -43,6 +44,8 @@
 
 <PageHeader title="Keyword Intelligence" blurb="A seed keyword expands into the questions, prepositions and comparisons real searchers use — harmonized from AnswerThePublic." />
 
+<BrandBanner name="keywords" />
+
 <div class="guru-card mb-4 p-5">
 	<form class="flex flex-wrap items-end gap-3" onsubmit={(e) => { e.preventDefault(); research(); }}>
 		<div class="min-w-52 flex-1">
@@ -77,7 +80,7 @@
 					<div class="mb-3">
 						<p class="text-xs font-bold uppercase text-slate-500">{w}</p>
 						<ul class="mt-1 space-y-0.5">
-							{#each list as q (q)}
+							{#each (list as string[]) as q (q)}
 								<li class="rounded bg-ink-850/60 px-2 py-1 text-[13px] text-slate-300">{q}</li>
 							{/each}
 						</ul>

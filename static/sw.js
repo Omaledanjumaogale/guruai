@@ -1,51 +1,49 @@
 /* Guru AI service worker — offline shell only.
  *
- * Deliberately narrow: it intercepts *navigations* and nothing else. Build
- * assets are content-hashed and served by Cloudflare's edge cache, so letting
- * the worker cache them risks pinning an HTML fallback under a script URL and
- * blanking the app. Navigation requests go to the network first and only fall
- * back to the cached shell when the device is offline.
+ * Navigations are network-first; the cached shell (or /offline.html) is used only
+ * when the device is offline. Build assets are content-hashed and cached at the
+ * edge, so the worker deliberately never intercepts them.
  */
-const CACHE = "guru-ai-v3";
-const SHELL = ["/", "/manifest.webmanifest", "/icons/icon.svg"];
+const CACHE = "guru-ai-v4";
+const SHELL = ["/", "/offline.html", "/manifest.webmanifest", "/icons/icon.svg"];
 
 self.addEventListener("install", (event) => {
 	event.waitUntil(
 		caches
 			.open(CACHE)
-			.then((c) => Promise.allSettled(SHELL.map((url) => c.add(url))))
+			.then((cache) => Promise.allSettled(SHELL.map((url) => cache.add(url))))
 			.then(() => self.skipWaiting())
 	);
+});
+
+self.addEventListener("message", (event) => {
+	if (event.data === "SKIP_WAITING") self.skipWaiting();
 });
 
 self.addEventListener("activate", (event) => {
 	event.waitUntil(
 		caches
 			.keys()
-			.then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
+			.then((keys) => Promise.all(keys.filter((key) => key !== CACHE).map((key) => caches.delete(key))))
 			.then(() => self.clients.claim())
 	);
 });
 
 self.addEventListener("fetch", (event) => {
 	const { request } = event;
-	if (request.method !== "GET") return;
-	if (request.mode !== "navigate") return; // assets: straight to the network
-
+	if (request.method !== "GET" || request.mode !== "navigate") return;
 	const url = new URL(request.url);
 	if (url.origin !== self.location.origin) return;
 
 	event.respondWith(
 		fetch(request, { cache: "no-store" })
-			.then((res) => {
-				// Only a real document is worth caching; fallback HTML served for a
-				// missing asset must never be stored.
-				if (res.ok && (res.headers.get("content-type") ?? "").includes("text/html")) {
-					const copy = res.clone();
-					caches.open(CACHE).then((c) => c.put("/", copy));
+			.then((response) => {
+				if (response.ok && (response.headers.get("content-type") ?? "").includes("text/html")) {
+					const copy = response.clone();
+					caches.open(CACHE).then((cache) => cache.put("/", copy));
 				}
-				return res;
+				return response;
 			})
-			.catch(async () => (await caches.match("/")) || Response.error())
+			.catch(async () => (await caches.match(request)) || (await caches.match("/")) || (await caches.match("/offline.html")) || Response.error())
 	);
 });

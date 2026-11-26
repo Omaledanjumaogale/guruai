@@ -1,5 +1,12 @@
 <script lang="ts">
-	let { title, blurb = "", children, actions = null } = $props();
+	import type { Snippet } from "svelte";
+
+	let {
+		title,
+		blurb = "",
+		children,
+		actions = null
+	}: { title: string; blurb?: string; children?: Snippet; actions?: Snippet | null } = $props();
 </script>
 
 <header class="mb-6 flex flex-wrap items-end justify-between gap-3">

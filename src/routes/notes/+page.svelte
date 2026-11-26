@@ -1,5 +1,6 @@
 <script lang="ts">
 	import PageHeader from "$lib/components/PageHeader.svelte";
+	import BrandBanner from "$lib/components/BrandBanner.svelte";
 	import { workspaceId, toastOk } from "$lib/stores";
 	import { gq, mx } from "$lib/convex";
 
@@ -49,6 +50,8 @@
 <PageHeader title="Notes" blurb="Fast capture with pins, colors, tags and instant search — the Keep experience, saved to your workspace.">
 	<button class="guru-btn guru-btn-primary" onclick={quickCreate}>＋ New note</button>
 </PageHeader>
+
+<BrandBanner name="notes" />
 
 <div class="mb-4 flex flex-wrap items-center gap-3">
 	<input class="guru-input !w-64" placeholder="Search notes…" bind:value={search} />

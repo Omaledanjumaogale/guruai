@@ -1,5 +1,6 @@
 <script lang="ts">
 	import PageHeader from "$lib/components/PageHeader.svelte";
+	import BrandBanner from "$lib/components/BrandBanner.svelte";
 	import MarkdownLite from "$lib/components/MarkdownLite.svelte";
 	import StatusDot from "$lib/components/StatusDot.svelte";
 	import { workspaceId, toastOk, toastErr, errorText } from "$lib/stores";
@@ -13,7 +14,7 @@
 	const S_chats = $derived(wid ? gq("chats.list", { workspaceId: wid }) : null);
 	const chats = $derived(S_chats ? $S_chats : null);
 	let activeChat = $state<string>("");
-	const currentChat = $derived((chats ?? []).find((c) => c._id === activeChat) ?? null);
+	const currentChat = $derived((chats ?? []).find((c: any) => c._id === activeChat) ?? null);
 	const S_messages = $derived(currentChat ? gq("chats.messagesFor", { chatId: currentChat._id }) : null);
 	const messages = $derived(S_messages ? ($S_messages ?? []) : []);
 
@@ -80,9 +81,13 @@
 	}
 </script>
 
+{#snippet codeaction(code: string)}<CopyButton text={code} />{/snippet}
+
 <PageHeader title="Chat" blurb="Multi-model AI chat. Leave the engine on Auto and GuruRoute sends each message to the best connector for the job.">
-	<button class="guru-btn guru-btn-primary" onclick={newChat}>＋ New chat</button>
+	<button class="guru-btn guru-btn-primary" onclick={() => newChat()}>＋ New chat</button>
 </PageHeader>
+
+<BrandBanner name="chat" />
 
 <div class="grid gap-4 lg:grid-cols-[260px_1fr]">
 	<!-- chat list -->
@@ -153,9 +158,8 @@
 							{:else if m.role === "user"}
 								<p class="whitespace-pre-wrap text-[14.5px] leading-relaxed text-slate-100">{m.content}</p>
 							{:else}
-								<MarkdownLite content={m.content} />
+								<MarkdownLite content={m.content} codeaction={codeaction} />
 								<div class="mt-1 flex items-center justify-end gap-2">
-									{#snippet codeaction(code)}<CopyButton text={code} />{/snippet}
 									<span class="text-[10px] text-slate-500">{m.model ?? ""}</span>
 								</div>
 							{/if}

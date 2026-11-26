@@ -84,6 +84,7 @@
 							{#if kind === "image"}
 								<img src={g.resultUrl} alt={g.prompt} class="aspect-square w-full object-cover" loading="lazy" />
 							{:else if kind === "video"}
+								<!-- svelte-ignore a11y_media_has_caption -- generated clips carry no speech -->
 								<video src={g.resultUrl} controls class="w-full bg-black"></video>
 							{:else}
 								<audio src={g.resultUrl} controls class="w-full p-3"></audio>
