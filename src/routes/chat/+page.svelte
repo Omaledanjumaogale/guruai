@@ -7,6 +7,7 @@
 	import { gq, mx, ax } from "$lib/convex";
 	import { route, detectTask, DEFAULT_MODELS, TASK_TYPES } from "$lib/routing";
 	import CopyButton from "$lib/components/CopyButton.svelte";
+	import Logo from "$lib/components/Logo.svelte";
 
 	const wid = $derived($workspaceId);
 
@@ -93,12 +94,12 @@
 	<!-- chat list -->
 	<aside class="guru-card max-h-[70vh] overflow-y-auto p-3">
 		<div class="mb-2 flex items-center justify-between px-1">
-			<h2 class="text-xs font-semibold uppercase tracking-wider text-slate-500">History</h2>
+			<h2 class="text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--muted)]">History</h2>
 			{#if currentChat}
 				<div class="flex gap-1">
-					<button class="rounded p-1 text-xs text-slate-400 hover:text-white" title="Pin" onclick={() => act("pin")}>{currentChat.pinned ? "★" : "☆"}</button>
-					<button class="rounded p-1 text-xs text-slate-400 hover:text-white" title="Archive" onclick={() => act("archive")}>🗄</button>
-					<button class="rounded p-1 text-xs text-slate-400 hover:text-rose-300" title="Delete" onclick={() => act("delete")}>🗑</button>
+					<button class="rounded p-1 text-xs text-[var(--muted)] transition hover:text-[var(--ink)]" title="Pin" onclick={() => act("pin")}>{currentChat.pinned ? "★" : "☆"}</button>
+					<button class="rounded p-1 text-xs text-[var(--muted)] transition hover:text-[var(--ink)]" title="Archive" onclick={() => act("archive")}>🗄</button>
+					<button class="rounded p-1 text-xs text-[var(--muted)] transition hover:text-[var(--accent)]" title="Delete" onclick={() => act("delete")}>🗑</button>
 				</div>
 			{/if}
 		</div>
@@ -106,25 +107,25 @@
 			<ul class="space-y-1">
 				{#each chats as c (c._id)}
 					<li>
-						<button class="w-full rounded-lg px-3 py-2 text-left text-sm transition {activeChat === c._id ? 'bg-indigo-500/20 text-indigo-100' : 'text-slate-300 hover:bg-white/5'}" onclick={() => (activeChat = c._id)}>
+						<button class="w-full rounded-lg px-3 py-2 text-left text-sm transition {activeChat === c._id ? 'bg-[var(--accent-soft)] text-[var(--accent)]' : 'text-[var(--ink-soft)] hover:bg-[var(--surface-2)]'}" onclick={() => (activeChat = c._id)}>
 							<span class="line-clamp-1">{c.pinned ? "★ " : ""}{c.title}</span>
-							<span class="text-[10px] text-slate-500">{c.provider}:{c.model}</span>
+							<span class="text-[10px] text-[var(--muted)]">{c.provider}:{c.model}</span>
 						</button>
 					</li>
 				{/each}
 			</ul>
 		{:else}
-			<p class="px-1 py-4 text-sm text-slate-500">No chats yet. Start one — history is saved to your workspace.</p>
+			<p class="px-1 py-4 text-[12.5px] leading-relaxed text-[var(--muted)]">No chats yet. Start one — history is saved to your workspace.</p>
 		{/if}
 	</aside>
 
 	<!-- conversation -->
 	<section class="guru-card flex min-h-[60vh] flex-col p-0">
-		<div class="flex items-center justify-between gap-2 border-b border-indigo-500/10 px-4 py-2.5">
+		<div class="flex items-center justify-between gap-2 border-b border-[var(--line)] px-4 py-2.5">
 			<div class="flex items-center gap-2">
-				<label class="flex items-center gap-1.5 text-xs text-slate-400">
-					<input type="checkbox" bind:checked={autoRoute} class="accent-indigo-500" />
-					<strong class="text-slate-300">GuruRoute Auto</strong>
+				<label class="flex items-center gap-1.5 text-xs text-[var(--muted)]">
+					<input type="checkbox" bind:checked={autoRoute} class="accent-[var(--accent)]" />
+					<strong class="text-[var(--ink)]">GuruRoute Auto</strong>
 				</label>
 				{#if !autoRoute}
 					<select class="guru-input !w-auto !py-1 text-xs" bind:value={manualProvider}>
@@ -139,40 +140,40 @@
 					</select>
 				{/if}
 			</div>
-			<span class="text-[10px] text-slate-500">{connectors ? `${connectors.length} connector(s) ready` : ""}</span>
+			<span class="text-[10px] text-[var(--muted)]">{connectors ? `${connectors.length} connector(s) ready` : ""}</span>
 		</div>
 
 		<div class="flex-1 space-y-3 overflow-y-auto p-4">
 			{#if messages.length === 0}
 				<div class="flex h-full flex-col items-center justify-center gap-2 text-center">
-					<div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-cyan-500 text-2xl text-white">G</div>
-					<p class="text-base font-semibold text-slate-200">Ask Guru anything</p>
-					<p class="max-w-sm text-sm text-slate-500">Chat, code, analyze, plan — GuruRoute picks the strongest model you have connected for every message.</p>
+					<div class="flex h-16 w-16 items-center justify-center rounded-2xl border border-[var(--line)] bg-[var(--surface-2)]"><Logo size={38} wordmark={false} /></div>
+					<p class="mt-1 text-lg font-extrabold tracking-tight text-[var(--ink)]">Ask Guru anything</p>
+					<p class="max-w-sm text-[12.5px] leading-relaxed text-[var(--muted)]">Chat, code, analyse, plan — GuruRoute picks the strongest model you have connected for every message.</p>
 				</div>
 			{:else}
 				{#each messages as m (m._id)}
 					<div class="flex {m.role === 'user' ? 'justify-end' : 'justify-start'}">
-						<div class="max-w-[85%] rounded-2xl px-4 py-2.5 {m.role === 'user' ? 'bg-indigo-500/25' : 'bg-ink-850/80 border border-indigo-500/10'}">
+						<div class="max-w-[85%] rounded-2xl px-4 py-2.5 {m.role === 'user' ? 'bg-[var(--accent)] text-white' : 'border border-[var(--line)] bg-[var(--surface-2)]'}">
 							{#if m.role === "system"}
 								<p class="text-xs text-amber-200">{m.content}</p>
 							{:else if m.role === "user"}
-								<p class="whitespace-pre-wrap text-[14.5px] leading-relaxed text-slate-100">{m.content}</p>
+								<p class="whitespace-pre-wrap text-[14px] leading-relaxed text-white">{m.content}</p>
 							{:else}
 								<MarkdownLite content={m.content} codeaction={codeaction} />
 								<div class="mt-1 flex items-center justify-end gap-2">
-									<span class="text-[10px] text-slate-500">{m.model ?? ""}</span>
+									<span class="text-[10px] text-[var(--muted)]">{m.model ?? ""}</span>
 								</div>
 							{/if}
 						</div>
 					</div>
 				{/each}
 				{#if sending}
-					<div class="flex items-center gap-2 text-sm text-slate-400"><span class="guru-spin h-4 w-4 rounded-full border-2 border-indigo-500/30 border-t-indigo-400"></span> Guru is thinking…</div>
+					<div class="flex items-center gap-2 text-sm text-[var(--muted)]"><span class="guru-spin h-4 w-4 rounded-full border-2 border-[var(--line-strong)] border-t-[var(--accent)]"></span> Guru is thinking…</div>
 				{/if}
 			{/if}
 		</div>
 
-		<form class="flex items-end gap-2 border-t border-indigo-500/10 p-3" onsubmit={(e) => { e.preventDefault(); send(); }}>
+		<form class="flex items-end gap-2 border-t border-[var(--line)] p-3" onsubmit={(e) => { e.preventDefault(); send(); }}>
 			<textarea
 				class="guru-input max-h-40 min-h-[44px] flex-1 resize-y"
 				placeholder="Message Guru…  (Enter to send, Shift+Enter for a new line)"

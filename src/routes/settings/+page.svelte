@@ -72,7 +72,7 @@
 		{#if $session}
 			<p class="text-sm font-semibold text-white">{me?.profile?.displayName ?? me?.account.name ?? $account?.email}</p>
 			<p class="text-xs text-slate-500">{$account?.email} · {me?.roleKeys.join(" · ") || "member"}</p>
-			<p class="mt-1 text-[11px] text-slate-500">Plan: <span class="text-indigo-300">{me?.plan?.name ?? "Starter"}</span></p>
+			<p class="mt-1 text-[11px] text-[var(--muted)]">Plan: <span class="text-[var(--accent)]">{me?.account?.role === "admin" ? "Enterprise" : (me?.plan?.name ?? "Starter")}</span></p>
 			<div class="mt-4 flex flex-wrap gap-2">
 				<a href="/profile" class="guru-btn guru-btn-ghost !px-3 !py-1.5 !text-xs">Edit profile</a>
 				<a href="/roles" class="guru-btn guru-btn-ghost !px-3 !py-1.5 !text-xs">Roles</a>
@@ -140,7 +140,7 @@
 			{#each installSteps as step (step.label)}
 				<div class="rounded-lg border border-indigo-500/15 bg-ink-950/60 p-3">
 					<div class="mb-2 flex items-center justify-between"><p class="text-xs font-semibold text-slate-300">{step.label}</p><CopyButton text={step.code} /></div>
-					<pre class="overflow-x-auto font-mono text-[11.5px] leading-relaxed text-cyan-100">{step.code}</pre>
+					<pre class="overflow-x-auto rounded-lg border border-white/10 bg-[#08080b] px-3 py-2.5 font-mono text-[11.5px] leading-relaxed text-cyan-100">{step.code}</pre>
 				</div>
 			{/each}
 		</div>

@@ -1,7 +1,16 @@
 import { writable } from "svelte/store";
 
 /** Guru AI identity: OAuth (Google/GitHub) or super-admin login. */
-export type Account = { email: string; name: string; role: string; provider: string; avatarUrl?: string };
+export type Account = {
+	email: string;
+	name: string;
+	role: string;
+	provider: string;
+	avatarUrl?: string;
+	/** True when this account is linked to the E-WIN central hub identity. */
+	hubLinked?: boolean;
+	hubEmail?: string | null;
+};
 
 const TOKEN_KEY = "guru.auth.token";
 
@@ -91,6 +100,25 @@ export async function passwordLogin(email: string, password: string): Promise<Ac
 	const { ax } = await import("./convex");
 	const res = await ax<{ token: string; account: Account }>("auth.passwordLogin", { email: email.trim(), password });
 	return storeSession(res);
+}
+
+/** Sign in explicitly through the E-WIN central hub. */
+export async function ewinLogin(email: string, password: string): Promise<Account> {
+	authError.set("");
+	const { ax } = await import("./convex");
+	const res = await ax<{ token: string; account: Account }>("auth.hubLogin", { email: email.trim(), password });
+	return storeSession(res);
+}
+
+/** Link the signed-in account to its E-WIN Hub identity (also used to reconnect). */
+export async function connectEwinIdentity(token: string, email: string, password: string): Promise<void> {
+	const { ax } = await import("./convex");
+	await ax("hub.link", { token, email: email.trim(), password });
+}
+
+export async function disconnectEwinIdentity(token: string): Promise<void> {
+	const { ax } = await import("./convex");
+	await ax("hub.unlink", { token });
 }
 
 /** Create an email + password account. */

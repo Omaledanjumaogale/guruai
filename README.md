@@ -11,12 +11,13 @@ SvelteKit + Convex + Cloudflare Pages stack, installable as a PWA on desktop and
 
 | Area | Modules |
 | --- | --- |
-| Workspace | Dashboard, Notes (Keep-style pins, colors, tags), Agents (multi-step runs with logs) |
-| Intelligence | Chat (GuruRoute auto-routing), Image / Video / Music studios, Visuals, Humanizer, AI Toolbox |
+| Workspace | Dashboard, Chat, Notes (Keep-style pins, colors, tags), Agents (multi-step runs with logs) |
+| Intelligence | GuruRoute auto-routing across every engine, Image / Video / Music studios, Visuals, Humanizer, AI Toolbox |
 | Research | Keywords (questions, prepositions, comparisons), Transcripts (YouTube to text), Convert |
 | Developer | Reverse API Lab (HAR to typed client, repo key extractor), Connector Vault, GuruRoute |
-| Governance | Profile, Roles & Access (least-privilege RBAC with approval queue), Plan & entitlements, Messages (private support threads), Notifications |
-| Control | Settings (install/deploy, build identity, offline shell), Super Admin console (accounts, role approvals, announcements, support inbox, audit trail, deployment) |
+| Identity | E-WIN Hub single identity, verified sessions, local profile sync, hub reconnect and unlink |
+| Governance | Profile, Team directory, Roles & Access (least-privilege RBAC with approval queue), Security & sessions, Plan & entitlements, Messages, Notifications |
+| Control | Analytics, Activity timeline, Settings (install/deploy, build identity, offline shell), Super Admin console (accounts, roles, announcements, support inbox, audit trail, deployment) |
 
 ## Stack
 
@@ -29,6 +30,9 @@ SvelteKit + Convex + Cloudflare Pages stack, installable as a PWA on desktop and
 
 Browsers never see provider keys or password hashes; they hold an opaque `gst_...` session token.
 
+- **E-WIN Hub identity** — browser passwords go to the hub over a server-to-server call; Guru AI stores
+  only an opaque session and a salted local hash. Hub-linked accounts are verified by the hub on every
+  sign-in; a verified local hash is honoured only when the hub itself is unreachable.
 - **Email + password** — `auth.register` / `auth.passwordLogin` (salted SHA-256, 14-day sessions)
 - **Google / GitHub OAuth** — `/oauth/{provider}/start` and `/oauth/{provider}/callback` HTTP actions
 - **Super admin** — the account matching `SUPER_ADMIN_EMAIL` is promoted to admin; `/admin` exposes the
@@ -66,7 +70,9 @@ npx wrangler pages deploy build --project-name guruai --branch main
 
 Backend environment (`npx convex env set KEY value`): `SUPER_ADMIN_EMAIL`, `SUPER_ADMIN_PASSWORD`,
 `APP_URL`, `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET`, `GITHUB_CLIENT_ID`/`GITHUB_CLIENT_SECRET`,
-`RESEND_API_KEY`, `AGNES_AI_KEY`, `ADMIN_SESSION_SECRET`.
+`RESEND_API_KEY`, `AGNES_AI_KEY`, `ADMIN_SESSION_SECRET`, `EWIN_HUB_SITE_URL`, `EWIN_HUB_APP_URL`
+(hub endpoints default to the production E-WIN deployment; set `EWIN_HUB_DISABLED=1` for an isolated
+local install).
 
 ## Quality gates
 

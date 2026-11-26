@@ -125,7 +125,20 @@
 					</div>
 				{/if}
 			{/if}
-			<p class="mt-3 border-t border-white/8 pt-3 text-[11px] text-slate-500">{me?.permissions.length ?? 0} permissions active · plan <a class="text-indigo-300 hover:underline" href="/subscription">{me?.plan?.name ?? "Starter"}</a></p>
+			<p class="mt-3 border-t border-[var(--line)] pt-3 text-[11px] text-[var(--muted)]">{me?.permissions.length ?? 0} permissions active · plan <a class="text-[var(--accent)] hover:underline" href="/subscription">{me?.account?.role === "admin" ? "Enterprise" : (me?.plan?.name ?? "Starter")}</a></p>
+			{#if me?.permissions?.length}
+				<div class="mt-4 border-t border-[var(--line)] pt-4">
+					<div class="flex items-center justify-between gap-2">
+						<h3 class="text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--muted)]">Effective permissions</h3>
+						<span class="text-[10px] text-[var(--muted)]">least privilege</span>
+					</div>
+					<div class="mt-2.5 flex flex-wrap gap-1.5">
+						{#each me.permissions as key (key)}
+							<span class="guru-chip !py-1 !text-[9.5px] !tracking-normal">{permissionLabels[key] ?? key}</span>
+						{/each}
+					</div>
+				</div>
+			{/if}
 		</div>
 
 		<div class="guru-card p-5">

@@ -216,7 +216,7 @@
 </script>
 
 <PageHeader title="Super Admin Console" blurb="Accounts, roles, announcements, conversations and the audit trail for this deployment.">
-	{#if isAdmin}<span class="guru-chip border-emerald-400/30 bg-emerald-400/10 text-emerald-200">Live · {overview?.counts.accounts ?? "…"} accounts</span>{/if}
+	{#if isAdmin}<span class="guru-chip guru-chip-green">Live · {overview?.counts.accounts ?? "…"} accounts</span>{/if}
 </PageHeader>
 
 {#if isAdmin}<BrandBanner name="admin" />{/if}
@@ -224,7 +224,7 @@
 {#if !isAdmin}
 	<div class="grid gap-4 lg:grid-cols-2">
 		<div class="guru-card p-5">
-			<h2 class="mb-3 text-sm font-semibold uppercase tracking-wider text-slate-400">Super admin sign-in</h2>
+			<h2 class="mb-3 text-sm font-semibold uppercase tracking-wider text-[var(--muted)]">Super admin sign-in</h2>
 			{#if acc}
 				<div class="mb-3 rounded-lg border border-amber-400/30 bg-amber-400/10 px-3 py-2 text-xs leading-relaxed text-amber-200">
 					Signed in as <strong>{acc.email}</strong> ({acc.role}). This console needs the super-admin account — signing in below replaces this session.
@@ -237,53 +237,53 @@
 			</form>
 		</div>
 		<div class="guru-card p-5">
-			<h2 class="mb-3 text-sm font-semibold uppercase tracking-wider text-slate-400">Single sign-on</h2>
+			<h2 class="mb-3 text-sm font-semibold uppercase tracking-wider text-[var(--muted)]">Single sign-on</h2>
 			<div class="space-y-2">
 				<button class="guru-btn guru-btn-ghost w-full justify-start" onclick={() => startOAuth("google")}>G&nbsp; Continue with Google</button>
 				<button class="guru-btn guru-btn-ghost w-full justify-start" onclick={() => startOAuth("github")}>⌂ Continue with GitHub</button>
 			</div>
-			<p class="mt-3 text-[11px] leading-relaxed text-slate-500">OAuth runs through <code class="rounded bg-ink-800 px-1">{httpSite || "the backend"}</code>. The configured super-admin email is promoted automatically.</p>
-			<a class="mt-3 inline-block text-xs text-indigo-300 hover:underline" href="/login">Use another account →</a>
+			<p class="mt-3 text-[11px] leading-relaxed text-[var(--muted)]">OAuth runs through <code class="rounded bg-[var(--surface-2)] px-1">{httpSite || "the backend"}</code>. The configured super-admin email is promoted automatically.</p>
+			<a class="mt-3 inline-block text-xs text-[var(--accent)] hover:underline" href="/login">Use another account →</a>
 		</div>
 	</div>
 {:else}
 	<div class="mb-4 flex flex-wrap items-center justify-between gap-3">
 		<div class="guru-card flex items-center gap-3 px-4 py-3">
-			<span class="flex h-9 w-9 items-center justify-center rounded-full bg-indigo-500/30 text-sm font-bold text-indigo-200">{(acc?.name ?? acc?.email ?? "A").slice(0, 1).toUpperCase()}</span>
-			<div><p class="text-sm font-semibold text-white">{acc?.name ?? acc?.email}</p><p class="text-xs text-slate-500">{acc?.email} · {me?.roleKeys.join(" · ") || acc?.role}</p></div>
+			<span class="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--accent-soft)] text-sm font-bold text-[var(--accent)]">{(acc?.name ?? acc?.email ?? "A").slice(0, 1).toUpperCase()}</span>
+			<div><p class="text-sm font-semibold text-[var(--ink)]">{acc?.name ?? acc?.email}</p><p class="text-xs text-[var(--muted)]">{acc?.email} · {me?.roleKeys.join(" · ") || acc?.role}</p></div>
 		</div>
 		<div class="flex flex-wrap gap-2"><button class="guru-btn guru-btn-ghost" onclick={sendTest} disabled={busy === "test"}>✉ Test email</button><button class="guru-btn guru-btn-ghost" onclick={() => logout()}>Sign out</button></div>
 	</div>
 
-	<nav class="mb-4 flex gap-1 overflow-x-auto border-b border-white/8 pb-2" aria-label="Admin sections">
+	<nav class="mb-4 flex gap-1 overflow-x-auto border-b border-[var(--line)] pb-2" aria-label="Admin sections">
 		{#each visibleTabs as item (item.key)}
-			<button role="tab" aria-selected={tab === item.key} class="shrink-0 rounded-lg px-3 py-1.5 text-xs font-medium transition {tab === item.key ? 'bg-indigo-500/20 text-indigo-100' : 'text-slate-400 hover:bg-white/5 hover:text-slate-200'}" onclick={() => selectTab(item.key)}>{item.label}</button>
+			<button role="tab" aria-selected={tab === item.key} class="shrink-0 rounded-lg px-3 py-1.5 text-xs font-medium transition {tab === item.key ? 'bg-[var(--accent-soft)] text-[var(--accent)]' : 'text-[var(--muted)] hover:bg-[var(--surface-2)] hover:text-[var(--ink)]'}" onclick={() => selectTab(item.key)}>{item.label}</button>
 		{/each}
 	</nav>
 	{#if tab === "overview"}
 		<section class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
 			{#each [{ label: "Accounts", value: overview?.counts.accounts, hint: `${overview?.counts.active ?? 0} active` }, { label: "Pending roles", value: overview?.counts.pendingRoles, hint: "awaiting review" }, { label: "Open conversations", value: overview?.counts.openConversations, hint: "support threads" }, { label: "Announcements", value: overview?.counts.pendingBroadcasts, hint: "pending review" }] as card (card.label)}
-				<div class="guru-card p-4"><p class="text-[11px] uppercase tracking-wider text-slate-500">{card.label}</p><p class="mt-1 text-2xl font-bold text-white">{card.value ?? "…"}</p><p class="text-[11px] text-slate-500">{card.hint}</p></div>
+				<div class="guru-card p-4"><p class="text-[11px] uppercase tracking-wider text-[var(--muted)]">{card.label}</p><p class="mt-1 text-2xl font-bold text-[var(--ink)]">{card.value ?? "…"}</p><p class="text-[11px] text-[var(--muted)]">{card.hint}</p></div>
 			{/each}
 		</section>
 
 		<div class="mt-4 grid gap-4 lg:grid-cols-2">
 			<div class="guru-card p-5">
-				<div class="flex items-center justify-between"><h2 class="text-sm font-semibold text-white">Role requests</h2><button class="text-[11px] text-indigo-300 hover:underline" onclick={() => selectTab("roles")}>Review →</button></div>
+				<div class="flex items-center justify-between"><h2 class="text-sm font-semibold text-[var(--ink)]">Role requests</h2><button class="text-[11px] text-[var(--accent)] hover:underline" onclick={() => selectTab("roles")}>Review →</button></div>
 				{#if !overview}<div class="guru-skeleton mt-3 h-16 w-full"></div>
-				{:else if overview.pendingRoles.length === 0}<p class="mt-3 text-sm text-slate-400">Nothing waiting.</p>
-				{:else}<ul class="mt-3 space-y-2">{#each overview.pendingRoles as row (row._id)}<li class="flex items-center justify-between gap-2 text-xs"><span class="truncate text-slate-300">{row.email} · {row.roleKey}</span><span class="text-slate-600">{new Date(row.requestedAt).toLocaleDateString()}</span></li>{/each}</ul>{/if}
+				{:else if overview.pendingRoles.length === 0}<p class="mt-3 text-sm text-[var(--muted)]">Nothing waiting.</p>
+				{:else}<ul class="mt-3 space-y-2">{#each overview.pendingRoles as row (row._id)}<li class="flex items-center justify-between gap-2 text-xs"><span class="truncate text-[var(--ink-soft)]">{row.email} · {row.roleKey}</span><span class="text-[var(--muted)]">{new Date(row.requestedAt).toLocaleDateString()}</span></li>{/each}</ul>{/if}
 			</div>
 			<div class="guru-card p-5">
-				<div class="flex items-center justify-between"><h2 class="text-sm font-semibold text-white">Recent audit</h2><button class="text-[11px] text-indigo-300 hover:underline" onclick={() => selectTab("audit")}>Open log →</button></div>
+				<div class="flex items-center justify-between"><h2 class="text-sm font-semibold text-[var(--ink)]">Recent audit</h2><button class="text-[11px] text-[var(--accent)] hover:underline" onclick={() => selectTab("audit")}>Open log →</button></div>
 				{#if !overview}<div class="guru-skeleton mt-3 h-16 w-full"></div>
-				{:else if overview.audit.length === 0}<p class="mt-3 text-sm text-slate-400">No events yet.</p>
-				{:else}<ul class="mt-3 space-y-2">{#each overview.audit as row (row._id)}<li class="flex items-start justify-between gap-2 text-xs"><span class="min-w-0"><span class="block truncate text-slate-300">{row.action}</span><span class="block truncate text-[11px] text-slate-500">{row.actorEmail} · {row.targetType}</span></span><span class="shrink-0 text-[10px] text-slate-600">{new Date(row.at).toLocaleTimeString()}</span></li>{/each}</ul>{/if}
+				{:else if overview.audit.length === 0}<p class="mt-3 text-sm text-[var(--muted)]">No events yet.</p>
+				{:else}<ul class="mt-3 space-y-2">{#each overview.audit as row (row._id)}<li class="flex items-start justify-between gap-2 text-xs"><span class="min-w-0"><span class="block truncate text-[var(--ink-soft)]">{row.action}</span><span class="block truncate text-[11px] text-[var(--muted)]">{row.actorEmail} · {row.targetType}</span></span><span class="shrink-0 text-[10px] text-[var(--muted)]">{new Date(row.at).toLocaleTimeString()}</span></li>{/each}</ul>{/if}
 			</div>
 			<div class="guru-card p-5 lg:col-span-2">
-				<h2 class="text-sm font-semibold text-white">Newest accounts</h2>
+				<h2 class="text-sm font-semibold text-[var(--ink)]">Newest accounts</h2>
 				{#if !overview}<div class="guru-skeleton mt-3 h-16 w-full"></div>
-				{:else}<ul class="mt-3 divide-y divide-white/8">{#each overview.recentUsers as user (user.email)}<li class="flex flex-wrap items-center justify-between gap-2 py-2 text-xs"><span class="text-slate-200">{user.email}</span><span class="text-slate-500">{user.role} · {user.provider} · {new Date(user.lastLoginAt).toLocaleDateString()}</span></li>{/each}</ul>{/if}
+				{:else}<ul class="mt-3 divide-y divide-[var(--line)]">{#each overview.recentUsers as user (user.email)}<li class="flex flex-wrap items-center justify-between gap-2 py-2 text-xs"><span class="text-[var(--ink)]">{user.email}</span><span class="text-[var(--muted)]">{user.role} · {user.provider} · {new Date(user.lastLoginAt).toLocaleDateString()}</span></li>{/each}</ul>{/if}
 			</div>
 		</div>
 	{/if}
@@ -291,15 +291,15 @@
 	{#if tab === "accounts"}
 		<section class="guru-card p-4">
 			<div class="flex flex-wrap items-center justify-between gap-2">
-				<h2 class="text-sm font-semibold text-white">Accounts</h2>
+				<h2 class="text-sm font-semibold text-[var(--ink)]">Accounts</h2>
 				<input class="guru-input !w-64 !py-1.5 !text-xs" placeholder="Search email or name…" bind:value={search} />
 			</div>
 			{#if !accounts}<div class="mt-3 space-y-2"><div class="guru-skeleton h-10 w-full"></div><div class="guru-skeleton h-10 w-full"></div></div>
-			{:else if accounts.length === 0}<p class="mt-3 text-sm text-slate-400">No accounts match that search.</p>
+			{:else if accounts.length === 0}<p class="mt-3 text-sm text-[var(--muted)]">No accounts match that search.</p>
 			{:else}
-				<div class="mt-3 overflow-x-auto"><table class="w-full min-w-[720px] text-left text-xs"><thead class="text-[10px] uppercase tracking-wider text-slate-500"><tr><th class="pb-2">Member</th><th class="pb-2">Roles</th><th class="pb-2">Provider</th><th class="pb-2">Status</th><th class="pb-2">Last sign-in</th><th class="pb-2 text-right">Actions</th></tr></thead>
-					<tbody>{#each accounts as member (member.email)}<tr class="border-t border-white/8"><td class="py-2"><p class="text-slate-200">{member.email}</p><p class="text-[10px] text-slate-500">{member.name ?? "—"}{member.headline ? ` · ${member.headline}` : ""}</p></td><td class="py-2"><div class="flex flex-wrap gap-1">{#each (member.roles.length ? member.roles : [{ roleKey: member.role, status: "active" }]) as r (r.roleKey)}<span class="rounded-full border px-1.5 py-0.5 text-[9px] uppercase {statusTone(r.status)}">{r.roleKey}</span>{/each}</div></td><td class="py-2 text-slate-400">{member.provider}</td><td class="py-2"><span class="rounded-full border px-1.5 py-0.5 text-[9px] uppercase {member.status === 'suspended' ? 'border-rose-400/30 bg-rose-400/10 text-rose-300' : 'border-emerald-400/25 bg-emerald-400/10 text-emerald-300'}">{member.status}</span></td><td class="py-2 text-slate-500">{new Date(member.lastLoginAt).toLocaleDateString()}</td><td class="py-2 text-right">
-					{#if member.email === "Omaledanjumaogale@gmail.com"}<span class="text-[10px] uppercase text-slate-600">protected</span>{:else}<div class="flex justify-end gap-2"><button class="text-[11px] text-slate-400 hover:text-white" onclick={() => setStatus(member, member.status === "suspended" ? "active" : "suspended")} disabled={busy === `status:${member.email}`}>{member.status === "suspended" ? "Activate" : "Suspend"}</button><button class="text-[11px] text-slate-500 hover:text-rose-300" onclick={() => removeUser(member)} disabled={busy === `remove:${member.email}`}>Remove</button></div>{/if}
+				<div class="mt-3 overflow-x-auto"><table class="w-full min-w-[720px] text-left text-xs"><thead class="text-[10px] uppercase tracking-wider text-[var(--muted)]"><tr><th class="pb-2">Member</th><th class="pb-2">Roles</th><th class="pb-2">Provider</th><th class="pb-2">Status</th><th class="pb-2">Last sign-in</th><th class="pb-2 text-right">Actions</th></tr></thead>
+					<tbody>{#each accounts as member (member.email)}<tr class="border-t border-[var(--line)]"><td class="py-2"><p class="text-[var(--ink)]">{member.email}</p><p class="text-[10px] text-[var(--muted)]">{member.name ?? "—"}{member.headline ? ` · ${member.headline}` : ""}</p></td><td class="py-2"><div class="flex flex-wrap gap-1">{#each (member.roles.length ? member.roles : [{ roleKey: member.role, status: "active" }]) as r (r.roleKey)}<span class="rounded-full border px-1.5 py-0.5 text-[9px] uppercase {statusTone(r.status)}">{r.roleKey}</span>{/each}</div></td><td class="py-2 text-[var(--muted)]">{member.provider}</td><td class="py-2"><span class="rounded-full border px-1.5 py-0.5 text-[9px] uppercase {member.status === 'suspended' ? 'border-rose-400/30 bg-rose-400/10 text-rose-300' : 'border-emerald-400/25 bg-emerald-400/10 text-emerald-300'}">{member.status}</span></td><td class="py-2 text-[var(--muted)]">{new Date(member.lastLoginAt).toLocaleDateString()}</td><td class="py-2 text-right">
+					{#if member.email === "Omaledanjumaogale@gmail.com"}<span class="text-[10px] uppercase text-[var(--muted)]">protected</span>{:else}<div class="flex justify-end gap-2"><button class="text-[11px] text-[var(--muted)] hover:text-[var(--ink)]" onclick={() => setStatus(member, member.status === "suspended" ? "active" : "suspended")} disabled={busy === `status:${member.email}`}>{member.status === "suspended" ? "Activate" : "Suspend"}</button><button class="text-[11px] text-[var(--muted)] hover:text-[var(--accent)]" onclick={() => removeUser(member)} disabled={busy === `remove:${member.email}`}>Remove</button></div>{/if}
 					</td></tr>{/each}</tbody>
 				</table></div>
 			{/if}
@@ -309,16 +309,16 @@
 	{#if tab === "roles"}
 		<div class="grid gap-4 lg:grid-cols-2">
 			<section class="guru-card p-4">
-				<h2 class="text-sm font-semibold text-white">Requests</h2>
+				<h2 class="text-sm font-semibold text-[var(--ink)]">Requests</h2>
 				{#if !assignments}<div class="guru-skeleton mt-3 h-16 w-full"></div>
-				{:else if pendingRoles.length === 0}<p class="mt-3 text-sm text-slate-400">No pending requests.</p>
-				{:else}<ul class="mt-3 space-y-3">{#each pendingRoles as row (row._id)}<li class="rounded-lg border border-amber-400/20 bg-amber-400/[0.04] p-3"><p class="text-xs font-semibold text-slate-100">{row.email}</p><p class="text-[11px] text-slate-500">{row.roleName} · {new Date(row.requestedAt).toLocaleDateString()}</p>{#if row.reason}<p class="mt-1 text-[11px] italic text-slate-400">“{row.reason}”</p>{/if}<input class="guru-input mt-2 !py-1.5 !text-xs" placeholder="Decision note (audit)" bind:value={decisionNotes[row._id]} /><div class="mt-2 flex gap-2"><button class="guru-btn guru-btn-primary !px-2.5 !py-1 !text-[11px]" onclick={() => decideRole(row, "active")}>Approve</button><button class="guru-btn guru-btn-danger !px-2.5 !py-1 !text-[11px]" onclick={() => decideRole(row, "rejected")}>Reject</button></div></li>{/each}</ul>{/if}
+				{:else if pendingRoles.length === 0}<p class="mt-3 text-sm text-[var(--muted)]">No pending requests.</p>
+				{:else}<ul class="mt-3 space-y-3">{#each pendingRoles as row (row._id)}<li class="rounded-lg border border-amber-400/20 bg-amber-400/[0.04] p-3"><p class="text-xs font-semibold text-[var(--ink)]">{row.email}</p><p class="text-[11px] text-[var(--muted)]">{row.roleName} · {new Date(row.requestedAt).toLocaleDateString()}</p>{#if row.reason}<p class="mt-1 text-[11px] italic text-[var(--muted)]">“{row.reason}”</p>{/if}<input class="guru-input mt-2 !py-1.5 !text-xs" placeholder="Decision note (audit)" bind:value={decisionNotes[row._id]} /><div class="mt-2 flex gap-2"><button class="guru-btn guru-btn-primary !px-2.5 !py-1 !text-[11px]" onclick={() => decideRole(row, "active")}>Approve</button><button class="guru-btn guru-btn-danger !px-2.5 !py-1 !text-[11px]" onclick={() => decideRole(row, "rejected")}>Reject</button></div></li>{/each}</ul>{/if}
 			</section>
 			<section class="guru-card p-4">
-				<h2 class="text-sm font-semibold text-white">Assign a role</h2>
+				<h2 class="text-sm font-semibold text-[var(--ink)]">Assign a role</h2>
 				<form class="mt-3 space-y-2" onsubmit={(e) => { e.preventDefault(); assignRole(); }}><input class="guru-input" type="email" required placeholder="member@company.com" bind:value={assignEmail} /><select class="guru-input" bind:value={assignRoleKey}>{#each (catalogue?.roles ?? []) as role (role.key)}<option value={role.key}>{role.name}</option>{/each}</select><input class="guru-input" placeholder="Reason (audit)" bind:value={assignReason} /><button class="guru-btn guru-btn-primary w-full" type="submit" disabled={busy === "assign"}>Assign</button></form>
-				<h3 class="mt-5 text-[11px] font-semibold uppercase tracking-wider text-slate-500">Recent decisions</h3>
-				<ul class="mt-2 space-y-1">{#each (assignments?.rows ?? []).filter((r: any) => r.status !== "requested").slice(0, 8) as row (row._id)}<li class="flex items-center justify-between gap-2 text-[11px] text-slate-400"><span class="truncate">{row.email} · {row.roleKey}</span><span class="shrink-0 uppercase text-slate-600">{row.status}</span></li>{/each}</ul>
+				<h3 class="mt-5 text-[11px] font-semibold uppercase tracking-wider text-[var(--muted)]">Recent decisions</h3>
+				<ul class="mt-2 space-y-1">{#each (assignments?.rows ?? []).filter((r: any) => r.status !== "requested").slice(0, 8) as row (row._id)}<li class="flex items-center justify-between gap-2 text-[11px] text-[var(--muted)]"><span class="truncate">{row.email} · {row.roleKey}</span><span class="shrink-0 uppercase text-[var(--muted)]">{row.status}</span></li>{/each}</ul>
 			</section>
 		</div>
 	{/if}
@@ -326,44 +326,44 @@
 	{#if tab === "broadcasts"}
 		<div class="grid gap-4 lg:grid-cols-[1fr_360px]">
 			<section class="guru-card p-4">
-				<h2 class="text-sm font-semibold text-white">Announcement queue</h2>
+				<h2 class="text-sm font-semibold text-[var(--ink)]">Announcement queue</h2>
 				{#if !broadcasts}<div class="guru-skeleton mt-3 h-20 w-full"></div>
-				{:else if broadcasts.length === 0}<p class="mt-3 text-sm text-slate-400">No announcements yet.</p>
-				{:else}<ul class="mt-3 space-y-2">{#each broadcasts as row (row._id)}<li class="rounded-lg border border-white/8 p-3"><div class="flex flex-wrap items-center justify-between gap-2"><p class="text-sm font-medium text-slate-100">{row.title}</p><span class="rounded-full border px-2 py-0.5 text-[9px] uppercase tracking-wider {row.status === 'sent' ? 'border-emerald-400/30 bg-emerald-400/10 text-emerald-300' : row.status === 'rejected' ? 'border-rose-400/30 bg-rose-400/10 text-rose-300' : 'border-amber-400/30 bg-amber-400/10 text-amber-300'}">{row.status}</span></div><p class="mt-1 text-xs leading-relaxed text-slate-400">{row.body}</p><p class="mt-1 text-[10px] text-slate-600">{audienceLabels[row.audience] ?? row.audience} · by {row.createdByEmail} · {new Date(row.createdAt).toLocaleDateString()}{row.recipientCount ? ` · ${row.recipientCount} delivered` : ""}</p>{#if row.status === "pending_review"}<input class="guru-input mt-2 !py-1.5 !text-xs" placeholder="Review note" bind:value={decisionNotes[row._id]} /><div class="mt-2 flex gap-2"><button class="guru-btn guru-btn-primary !px-2.5 !py-1 !text-[11px]" onclick={() => reviewBroadcast(row, "approve")} disabled={busy === `approve:${row._id}`}>Approve &amp; send</button><button class="guru-btn guru-btn-danger !px-2.5 !py-1 !text-[11px]" onclick={() => reviewBroadcast(row, "reject")} disabled={busy === `reject:${row._id}`}>Reject</button></div>{/if}</li>{/each}</ul>{/if}
+				{:else if broadcasts.length === 0}<p class="mt-3 text-sm text-[var(--muted)]">No announcements yet.</p>
+				{:else}<ul class="mt-3 space-y-2">{#each broadcasts as row (row._id)}<li class="rounded-lg border border-[var(--line)] p-3"><div class="flex flex-wrap items-center justify-between gap-2"><p class="text-sm font-medium text-[var(--ink)]">{row.title}</p><span class="rounded-full border px-2 py-0.5 text-[9px] uppercase tracking-wider {row.status === 'sent' ? 'border-emerald-400/30 bg-emerald-400/10 text-emerald-300' : row.status === 'rejected' ? 'border-rose-400/30 bg-rose-400/10 text-rose-300' : 'border-amber-400/30 bg-amber-400/10 text-amber-300'}">{row.status}</span></div><p class="mt-1 text-xs leading-relaxed text-[var(--muted)]">{row.body}</p><p class="mt-1 text-[10px] text-[var(--muted)]">{audienceLabels[row.audience] ?? row.audience} · by {row.createdByEmail} · {new Date(row.createdAt).toLocaleDateString()}{row.recipientCount ? ` · ${row.recipientCount} delivered` : ""}</p>{#if row.status === "pending_review"}<input class="guru-input mt-2 !py-1.5 !text-xs" placeholder="Review note" bind:value={decisionNotes[row._id]} /><div class="mt-2 flex gap-2"><button class="guru-btn guru-btn-primary !px-2.5 !py-1 !text-[11px]" onclick={() => reviewBroadcast(row, "approve")} disabled={busy === `approve:${row._id}`}>Approve &amp; send</button><button class="guru-btn guru-btn-danger !px-2.5 !py-1 !text-[11px]" onclick={() => reviewBroadcast(row, "reject")} disabled={busy === `reject:${row._id}`}>Reject</button></div>{/if}</li>{/each}</ul>{/if}
 			</section>
-			{#if can(me, "admin.broadcasts.create")}<form class="guru-card h-fit p-4" onsubmit={(e) => { e.preventDefault(); draftBroadcast(); }}><h2 class="text-sm font-semibold text-white">Draft an announcement</h2><p class="mt-1 text-[11px] text-slate-500">A second administrator must approve it before delivery.</p><input class="guru-input mt-3" required maxlength="120" placeholder="Title" bind:value={broadcast.title} /><textarea class="guru-input mt-2 min-h-24" required maxlength="2000" placeholder="What changed?" bind:value={broadcast.body}></textarea><select class="guru-input mt-2" bind:value={broadcast.audience}><option value="members">Members</option><option value="everyone">Everyone</option><option value="admins">Admins</option><option value="plan:pro">Pro plan</option><option value="plan:enterprise">Enterprise plan</option></select><button class="guru-btn guru-btn-primary mt-3 w-full" type="submit" disabled={busy === "broadcast"}>Send for review</button></form>{/if}
+			{#if can(me, "admin.broadcasts.create")}<form class="guru-card h-fit p-4" onsubmit={(e) => { e.preventDefault(); draftBroadcast(); }}><h2 class="text-sm font-semibold text-[var(--ink)]">Draft an announcement</h2><p class="mt-1 text-[11px] text-[var(--muted)]">A second administrator must approve it before delivery.</p><input class="guru-input mt-3" required maxlength="120" placeholder="Title" bind:value={broadcast.title} /><textarea class="guru-input mt-2 min-h-24" required maxlength="2000" placeholder="What changed?" bind:value={broadcast.body}></textarea><select class="guru-input mt-2" bind:value={broadcast.audience}><option value="members">Members</option><option value="everyone">Everyone</option><option value="admins">Admins</option><option value="plan:pro">Pro plan</option><option value="plan:enterprise">Enterprise plan</option></select><button class="guru-btn guru-btn-primary mt-3 w-full" type="submit" disabled={busy === "broadcast"}>Send for review</button></form>{/if}
 		</div>
 	{/if}
 
 	{#if tab === "messages"}
 		<div class="grid gap-4 lg:grid-cols-[300px_1fr]">
 			<aside class="guru-card max-h-[68vh] overflow-y-auto p-3">
-				<h2 class="px-1 text-xs font-semibold uppercase tracking-wider text-slate-500">Support inbox</h2>
+				<h2 class="px-1 text-xs font-semibold uppercase tracking-wider text-[var(--muted)]">Support inbox</h2>
 				{#if !inbox}<div class="mt-2 space-y-2"><div class="guru-skeleton h-12 w-full"></div><div class="guru-skeleton h-12 w-full"></div></div>
-				{:else if inbox.length === 0}<p class="px-1 py-6 text-sm text-slate-500">No member conversations.</p>
-				{:else}<ul class="mt-2 space-y-1">{#each inbox as c (c._id)}<li><button class="w-full rounded-lg px-3 py-2 text-left transition {conversationId === c._id ? 'bg-indigo-500/15' : 'hover:bg-white/5'}" onclick={() => openConversation(c._id)}><span class="block truncate text-xs font-medium text-slate-200">{c.subject}</span><span class="block truncate text-[10px] text-slate-500">{c.email} · {c.messageCount} msg</span></button></li>{/each}</ul>{/if}
+				{:else if inbox.length === 0}<p class="px-1 py-6 text-sm text-[var(--muted)]">No member conversations.</p>
+				{:else}<ul class="mt-2 space-y-1">{#each inbox as c (c._id)}<li><button class="w-full rounded-lg px-3 py-2 text-left transition {conversationId === c._id ? 'bg-indigo-500/15' : 'hover:bg-white/5'}" onclick={() => openConversation(c._id)}><span class="block truncate text-xs font-medium text-[var(--ink)]">{c.subject}</span><span class="block truncate text-[10px] text-[var(--muted)]">{c.email} · {c.messageCount} msg</span></button></li>{/each}</ul>{/if}
 			</aside>
 			<section class="guru-card flex min-h-[50vh] flex-col p-4">
-				{#if !conversationId}<p class="m-auto text-sm text-slate-500">Select a conversation to read and reply.</p>
+				{#if !conversationId}<p class="m-auto text-sm text-[var(--muted)]">Select a conversation to read and reply.</p>
 				{:else if !thread}<div class="guru-skeleton h-24 w-full"></div>
-				{:else}<header class="border-b border-white/8 pb-2"><h2 class="text-sm font-semibold text-white">{thread.conversation.subject}</h2><p class="text-[11px] text-slate-500">{thread.conversation.status} · opened {new Date(thread.conversation.createdAt).toLocaleDateString()}</p></header><div class="mt-3 flex-1 space-y-2 overflow-y-auto">{#each thread.messages as message (message._id)}<div class="flex {message.senderId === thread.meId ? 'justify-end' : 'justify-start'}"><div class="max-w-[85%] rounded-xl px-3 py-2 text-sm {message.senderId === thread.meId ? 'bg-indigo-500/20 text-indigo-50' : 'bg-white/[0.04] text-slate-200'}"><p class="mb-0.5 text-[10px] uppercase tracking-wider text-slate-500">{message.senderLabel}</p><p class="whitespace-pre-wrap leading-relaxed">{message.body}</p></div></div>{/each}</div>{#if thread.conversation.status !== "closed"}<form class="mt-3 flex items-end gap-2 border-t border-white/8 pt-3" onsubmit={(e) => { e.preventDefault(); sendReply(); }}><textarea class="guru-input min-h-11 flex-1 resize-none" rows="2" bind:value={reply} placeholder="Reply as staff…"></textarea><button class="guru-btn guru-btn-primary" type="submit" disabled={busy === "reply" || !reply.trim()}>Send</button></form>{/if}{/if}
+				{:else}<header class="border-b border-[var(--line)] pb-2"><h2 class="text-sm font-semibold text-[var(--ink)]">{thread.conversation.subject}</h2><p class="text-[11px] text-[var(--muted)]">{thread.conversation.status} · opened {new Date(thread.conversation.createdAt).toLocaleDateString()}</p></header><div class="mt-3 flex-1 space-y-2 overflow-y-auto">{#each thread.messages as message (message._id)}<div class="flex {message.senderId === thread.meId ? 'justify-end' : 'justify-start'}"><div class="max-w-[85%] rounded-xl px-3 py-2 text-sm {message.senderId === thread.meId ? 'bg-[var(--accent-soft)] text-[var(--ink)]' : 'bg-white/[0.04] text-[var(--ink)]'}"><p class="mb-0.5 text-[10px] uppercase tracking-wider text-[var(--muted)]">{message.senderLabel}</p><p class="whitespace-pre-wrap leading-relaxed">{message.body}</p></div></div>{/each}</div>{#if thread.conversation.status !== "closed"}<form class="mt-3 flex items-end gap-2 border-t border-[var(--line)] pt-3" onsubmit={(e) => { e.preventDefault(); sendReply(); }}><textarea class="guru-input min-h-11 flex-1 resize-none" rows="2" bind:value={reply} placeholder="Reply as staff…"></textarea><button class="guru-btn guru-btn-primary" type="submit" disabled={busy === "reply" || !reply.trim()}>Send</button></form>{/if}{/if}
 			</section>
 		</div>
 	{/if}
 
 	{#if tab === "audit"}
 		<section class="guru-card p-4">
-			<h2 class="text-sm font-semibold text-white">Audit trail</h2><p class="mt-1 text-xs text-slate-500">Append-only events, newest first. Bounded to the most recent 80 rows.</p>
+			<h2 class="text-sm font-semibold text-[var(--ink)]">Audit trail</h2><p class="mt-1 text-xs text-[var(--muted)]">Append-only events, newest first. Bounded to the most recent 80 rows.</p>
 			{#if !audit}<div class="guru-skeleton mt-3 h-24 w-full"></div>
-			{:else}<div class="mt-3 overflow-x-auto"><table class="w-full min-w-[640px] text-left text-xs"><thead class="text-[10px] uppercase tracking-wider text-slate-500"><tr><th class="pb-2">When</th><th class="pb-2">Actor</th><th class="pb-2">Action</th><th class="pb-2">Target</th><th class="pb-2">Outcome</th></tr></thead><tbody>{#each audit.rows as row (row._id)}<tr class="border-t border-white/8"><td class="py-1.5 text-slate-500">{new Date(row.at).toLocaleString()}</td><td class="py-1.5 text-slate-300">{row.actorEmail}</td><td class="py-1.5 text-slate-200">{row.action}</td><td class="py-1.5 text-slate-400">{row.targetType} · {row.targetId}</td><td class="py-1.5"><span class="rounded-full border px-1.5 py-0.5 text-[9px] uppercase {row.outcome === 'success' ? 'border-emerald-400/25 text-emerald-300' : row.outcome === 'denied' ? 'border-amber-400/25 text-amber-300' : 'border-rose-400/25 text-rose-300'}">{row.outcome}</span></td></tr>{/each}</tbody></table></div>{/if}
+			{:else}<div class="mt-3 overflow-x-auto"><table class="w-full min-w-[640px] text-left text-xs"><thead class="text-[10px] uppercase tracking-wider text-[var(--muted)]"><tr><th class="pb-2">When</th><th class="pb-2">Actor</th><th class="pb-2">Action</th><th class="pb-2">Target</th><th class="pb-2">Outcome</th></tr></thead><tbody>{#each audit.rows as row (row._id)}<tr class="border-t border-[var(--line)]"><td class="py-1.5 text-[var(--muted)]">{new Date(row.at).toLocaleString()}</td><td class="py-1.5 text-[var(--ink-soft)]">{row.actorEmail}</td><td class="py-1.5 text-[var(--ink)]">{row.action}</td><td class="py-1.5 text-[var(--muted)]">{row.targetType} · {row.targetId}</td><td class="py-1.5"><span class="rounded-full border px-1.5 py-0.5 text-[9px] uppercase {row.outcome === 'success' ? 'border-emerald-400/25 text-emerald-300' : row.outcome === 'denied' ? 'border-amber-400/25 text-amber-300' : 'border-rose-400/25 text-rose-300'}">{row.outcome}</span></td></tr>{/each}</tbody></table></div>{/if}
 		</section>
 	{/if}
 
 	{#if tab === "deployment"}
 		<div class="grid gap-4 lg:grid-cols-3">
-			<div class="guru-card p-5"><h2 class="text-sm font-semibold text-white">Build</h2>{#if buildInfo}<dl class="mt-2 space-y-1 text-xs"><div class="flex justify-between gap-2"><dt class="text-slate-500">Version</dt><dd class="text-slate-200">{buildInfo.version}</dd></div><div class="flex justify-between gap-2"><dt class="text-slate-500">Commit</dt><dd class="truncate font-mono text-[10px] text-slate-300">{buildInfo.commitSha?.slice(0, 12)}</dd></div><div class="flex justify-between gap-2"><dt class="text-slate-500">Branch</dt><dd class="text-slate-300">{buildInfo.branch}</dd></div><div class="flex justify-between gap-2"><dt class="text-slate-500">Built</dt><dd class="text-slate-300">{buildInfo.builtAt ? new Date(buildInfo.builtAt).toLocaleString() : "—"}</dd></div></dl>{:else}<p class="mt-2 text-xs text-slate-500">build-info.json unavailable.</p>{/if}</div>
-			<div class="guru-card p-5"><h2 class="text-sm font-semibold text-white">Engines</h2><ul class="mt-2 space-y-1.5 text-xs"><li class="flex justify-between"><span class="text-slate-400">Backend</span><span class="text-emerald-300">Convex live</span></li><li class="flex justify-between"><span class="text-slate-400">Frontend</span><span class="text-emerald-300">Cloudflare Pages</span></li><li class="flex justify-between"><span class="text-slate-400">Workspaces</span><span class="text-slate-200">{legacy?.workspaceCount ?? "…"}</span></li></ul>{#if legacy?.connectors?.length}<ul class="mt-3 space-y-1 border-t border-white/8 pt-2">{#each legacy.connectors.slice(0, 6) as connector (connector.provider + connector.origin)}<li class="flex items-center justify-between text-xs"><span class="text-slate-300">{connector.provider}</span><StatusDot status={connector.status} /></li>{/each}</ul>{/if}</div>
-			<div class="guru-card p-5"><h2 class="text-sm font-semibold text-white">Operations</h2><div class="mt-2 space-y-2 text-xs text-slate-400"><a class="block text-indigo-300 hover:underline" href="/roles">Role catalogue →</a><a class="block text-indigo-300 hover:underline" href="/subscription">Plan distribution →</a><a class="block text-indigo-300 hover:underline" href="/notifications">Notification health →</a><a class="block text-indigo-300 hover:underline" href="https://github.com/Omaledanjumaogale/guru-ai" target="_blank" rel="noreferrer">Repository ↗</a><a class="block text-indigo-300 hover:underline" href="https://github.com/Omaledanjumaogale/E_WIN_Project_Ecosystem" target="_blank" rel="noreferrer">E WIN ecosystem ↗</a></div><p class="mt-3 border-t border-white/8 pt-2 text-[11px] text-slate-600">Managed on Cloudflare Pages and Convex. Static shells are served without invoking Workers.</p></div>
+			<div class="guru-card p-5"><h2 class="text-sm font-semibold text-[var(--ink)]">Build</h2>{#if buildInfo}<dl class="mt-2 space-y-1 text-xs"><div class="flex justify-between gap-2"><dt class="text-[var(--muted)]">Version</dt><dd class="text-[var(--ink)]">{buildInfo.version}</dd></div><div class="flex justify-between gap-2"><dt class="text-[var(--muted)]">Commit</dt><dd class="truncate font-mono text-[10px] text-[var(--ink-soft)]">{buildInfo.commitSha?.slice(0, 12)}</dd></div><div class="flex justify-between gap-2"><dt class="text-[var(--muted)]">Branch</dt><dd class="text-[var(--ink-soft)]">{buildInfo.branch}</dd></div><div class="flex justify-between gap-2"><dt class="text-[var(--muted)]">Built</dt><dd class="text-[var(--ink-soft)]">{buildInfo.builtAt ? new Date(buildInfo.builtAt).toLocaleString() : "—"}</dd></div></dl>{:else}<p class="mt-2 text-xs text-[var(--muted)]">build-info.json unavailable.</p>{/if}</div>
+			<div class="guru-card p-5"><h2 class="text-sm font-semibold text-[var(--ink)]">Engines</h2><ul class="mt-2 space-y-1.5 text-xs"><li class="flex justify-between"><span class="text-[var(--muted)]">Backend</span><span class="text-emerald-300">Convex live</span></li><li class="flex justify-between"><span class="text-[var(--muted)]">Frontend</span><span class="text-emerald-300">Cloudflare Pages</span></li><li class="flex justify-between"><span class="text-[var(--muted)]">Workspaces</span><span class="text-[var(--ink)]">{legacy?.workspaceCount ?? "…"}</span></li></ul>{#if legacy?.connectors?.length}<ul class="mt-3 space-y-1 border-t border-[var(--line)] pt-2">{#each legacy.connectors.slice(0, 6) as connector (connector.provider + connector.origin)}<li class="flex items-center justify-between text-xs"><span class="text-[var(--ink-soft)]">{connector.provider}</span><StatusDot status={connector.status} /></li>{/each}</ul>{/if}</div>
+			<div class="guru-card p-5"><h2 class="text-sm font-semibold text-[var(--ink)]">Operations</h2><div class="mt-2 space-y-2 text-xs text-[var(--muted)]"><a class="block text-[var(--accent)] hover:underline" href="/roles">Role catalogue →</a><a class="block text-[var(--accent)] hover:underline" href="/subscription">Plan distribution →</a><a class="block text-[var(--accent)] hover:underline" href="/notifications">Notification health →</a><a class="block text-[var(--accent)] hover:underline" href="https://github.com/Omaledanjumaogale/guru-ai" target="_blank" rel="noreferrer">Repository ↗</a><a class="block text-[var(--accent)] hover:underline" href="https://github.com/Omaledanjumaogale/E_WIN_Project_Ecosystem" target="_blank" rel="noreferrer">E WIN ecosystem ↗</a></div><p class="mt-3 border-t border-[var(--line)] pt-2 text-[11px] text-[var(--muted)]">Managed on Cloudflare Pages and Convex. Static shells are served without invoking Workers.</p></div>
 		</div>
 	{/if}
 {/if}

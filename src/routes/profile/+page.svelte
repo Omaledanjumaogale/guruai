@@ -118,7 +118,7 @@
 				<dl class="mt-3 space-y-2 text-xs">
 					<div class="flex items-center justify-between gap-3"><dt class="text-slate-500">Status</dt><dd class="text-emerald-300">{me?.account.status ?? "active"}</dd></div>
 					<div class="flex items-center justify-between gap-3"><dt class="text-slate-500">Provider</dt><dd class="text-slate-200">{me?.account.provider ?? $account?.provider ?? "password"}</dd></div>
-					<div class="flex items-center justify-between gap-3"><dt class="text-slate-500">Plan</dt><dd class="text-slate-200">{me?.plan?.name ?? "Starter"}</dd></div>
+					<div class="flex items-center justify-between gap-3"><dt class="text-slate-500">Plan</dt><dd class="text-[var(--ink)]">{me?.account?.role === "admin" ? "Enterprise" : (me?.plan?.name ?? "Starter")}</dd></div>
 					<div class="flex items-center justify-between gap-3"><dt class="text-slate-500">Member since</dt><dd class="text-slate-200">{me?.account.createdAt ? new Date(me.account.createdAt).toLocaleDateString() : "—"}</dd></div>
 					<div class="flex items-center justify-between gap-3"><dt class="text-slate-500">Last sign-in</dt><dd class="text-slate-200">{me?.account.lastLoginAt ? new Date(me.account.lastLoginAt).toLocaleDateString() : "—"}</dd></div>
 				</dl>

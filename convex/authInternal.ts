@@ -105,3 +105,63 @@ export const upsertUser = internalMutation({
 		return ctx.db.insert("users", { provider, email, name, role, externalId, avatarUrl, createdAt: now, lastLoginAt: now });
 	}
 });
+
+/** Link a verified E-WIN Hub identity to a local account. */
+export const linkHubIdentity = internalMutation({
+	args: { email: v.string(), hubId: v.string(), hubEmail: v.string() },
+	handler: async (ctx, { email, hubId, hubEmail }) => {
+		const user = await ctx.db.query("users").withIndex("by_email", (q) => q.eq("email", email)).first();
+		if (!user) throw new Error("Account not found for hub link.");
+		const other = await ctx.db.query("users").withIndex("by_hub", (q) => q.eq("hubId", hubId)).first();
+		if (other && other._id !== user._id) throw new Error("This E-WIN identity is linked to another account.");
+		await ctx.db.patch(user._id, { hubId, hubEmail, hubLinkedAt: Date.now(), lastLoginAt: Date.now() });
+		return true;
+	}
+});
+
+/** Provision or synchronise a local account from a verified hub identity. */
+export const syncHubUser = internalMutation({
+	args: { email: v.string(), name: v.optional(v.string()), role: v.string(), passwordHash: v.string(), hubId: v.string(), hubEmail: v.string() },
+	handler: async (ctx, { email, name, role, passwordHash, hubId, hubEmail }) => {
+		const now = Date.now();
+		const other = await ctx.db.query("users").withIndex("by_hub", (q) => q.eq("hubId", hubId)).first();
+		if (other && other.email !== email) throw new Error("This E-WIN identity is linked to another account.");
+		const existing = await ctx.db.query("users").withIndex("by_email", (q) => q.eq("email", email)).first();
+		if (existing) {
+			await ctx.db.patch(existing._id, {
+				provider: existing.provider === "google" || existing.provider === "github" ? existing.provider : "ewin",
+				name: existing.name ?? name,
+				role: existing.role === "admin" ? "admin" : role,
+				passwordHash,
+				hubId,
+				hubEmail,
+				hubLinkedAt: now,
+				lastLoginAt: now
+			});
+			return existing._id;
+		}
+		return await ctx.db.insert("users", {
+			provider: "ewin",
+			email,
+			name,
+			role,
+			passwordHash,
+			hubId,
+			hubEmail,
+			hubLinkedAt: now,
+			createdAt: now,
+			lastLoginAt: now
+		});
+	}
+});
+
+/** Disconnect the hub identity while keeping the local password account. */
+export const clearHubIdentity = internalMutation({
+	args: { email: v.string() },
+	handler: async (ctx, { email }) => {
+		const user = await ctx.db.query("users").withIndex("by_email", (q) => q.eq("email", email)).first();
+		if (!user) return false;
+		await ctx.db.patch(user._id, { hubId: undefined, hubEmail: undefined, hubLinkedAt: undefined });
+		return true;
+	}
+});

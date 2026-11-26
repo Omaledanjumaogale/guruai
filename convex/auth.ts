@@ -1,6 +1,8 @@
 import { v, ConvexError } from "convex/values";
 import { action, mutation, query } from "./_generated/server";
 import { api, internal } from "./_generated/api";
+import { hubConfigured, hubSignIn, HubError, type HubIdentity } from "./hubClient";
+import { resolveSession } from "./authz";
 /** SHA-256 via WebCrypto (available in the Convex V8 runtime). */
 export function randomToken(): string {
 	const bytes = new Uint8Array(24);
@@ -50,7 +52,77 @@ async function checkPassword(password: string, stored: string): Promise<boolean>
 	return (await sha256(`${salt}:${password}`)) === hash;
 }
 
-type LoginResult = { token: string; account: { email: string; name: string; role: string; provider: string } };
+type LoginResult = {
+	token: string;
+	account: { email: string; name: string; role: string; provider: string; hubLinked?: boolean; hubEmail?: string };
+};
+
+/** Provision or synchronise a local account after the hub has verified the identity. */
+async function finishHubLogin(ctx: any, hub: HubIdentity, password: string): Promise<LoginResult> {
+	const email = normaliseEmail(hub.email);
+	const existing = await ctx.runQuery(internal.authInternal.lookupByEmail, { email });
+	if (existing?.status === "suspended" || existing?.status === "deleted") {
+		throw new ConvexError("This account is suspended. Contact the workspace owner.");
+	}
+	if (existing?.hubId && existing.hubId !== hub.id) {
+		throw new ConvexError("This email is linked to a different E-WIN identity. Contact the workspace owner.");
+	}
+	const role = existing?.role === "admin" || email === superAdminEmail() ? "admin" : "member";
+	const passwordHash = await hashPassword(password);
+	const userId = await ctx.runMutation(internal.authInternal.syncHubUser, {
+		email,
+		name: hub.name,
+		role,
+		passwordHash,
+		hubId: hub.id,
+		hubEmail: hub.email
+	});
+	const token = await createSession(ctx, userId, role);
+	await ctx.runMutation(internal.audit.logInternal, {
+		actorEmail: email,
+		action: existing ? "auth.hub_synced" : "auth.hub_provisioned",
+		targetType: "user",
+		targetId: email,
+		outcome: "success",
+		detail: existing
+			? "Signed in through the E-WIN central hub; local password and identity synchronised."
+			: "Provisioned from the E-WIN central hub on first sign-in."
+	});
+	return {
+		token,
+		account: {
+			email,
+			name: existing?.name ?? hub.name ?? email.split("@")[0],
+			role,
+			provider: existing?.provider ?? "ewin",
+			hubLinked: true,
+			hubEmail: hub.email
+		}
+	};
+}
+
+async function completeLocalLogin(
+	ctx: any,
+	user: any,
+	email: string,
+	password: string,
+	envAdmin: boolean
+): Promise<LoginResult> {
+	let role = user.role;
+	const adminEmail = superAdminEmail();
+	if (role !== "admin" && email === adminEmail) {
+		await ctx.runMutation(internal.authInternal.promoteAdmin, { userId: user._id });
+		role = "admin";
+	}
+	if (envAdmin && !user.passwordHash) {
+		await ctx.runMutation(internal.authInternal.setPasswordHash, { userId: user._id, passwordHash: await hashPassword(password) });
+	} else {
+		await ctx.runMutation(internal.authInternal.touchLogin, { userId: user._id });
+	}
+	const name = user.name ?? email.split("@")[0];
+	const token = await createSession(ctx, user._id, role);
+	return { token, account: { email, name, role, provider: user.provider, hubLinked: Boolean(user.hubId), hubEmail: user.hubEmail } };
+}
 
 async function loginCore(ctx: any, rawEmail: string, password: string): Promise<LoginResult> {
 	const email = normaliseEmail(rawEmail);
@@ -61,40 +133,66 @@ async function loginCore(ctx: any, rawEmail: string, password: string): Promise<
 
 	let user = await ctx.runQuery(internal.authInternal.lookupByEmail, { email });
 
-	if (!user) {
-		// Bootstrap the configured super-admin on first password sign-in.
-		if (envAdmin) {
-			const userId = await ctx.runMutation(internal.authInternal.ensurePasswordUser, {
-				email,
-				name: "Super Admin",
-				role: "admin",
-				passwordHash: await hashPassword(password)
-			});
-			const token = await createSession(ctx, userId, "admin");
-			return { token, account: { email, name: "Super Admin", role: "admin", provider: "password" } };
-		}
-		throw new ConvexError("No account found for this email. Create one first.");
+	// Bootstrap the configured super-admin on first password sign-in. Other
+	// unknown emails fall through to the E-WIN Hub check below.
+	if (!user && envAdmin) {
+		const userId = await ctx.runMutation(internal.authInternal.ensurePasswordUser, {
+			email,
+			name: "Super Admin",
+			role: "admin",
+			passwordHash: await hashPassword(password)
+		});
+		const token = await createSession(ctx, userId, "admin");
+		return { token, account: { email, name: "Super Admin", role: "admin", provider: "password" } };
+	}
+
+	if (user?.status === "suspended" || user?.status === "deleted") {
+		throw new ConvexError("This account is suspended. Contact the workspace owner.");
 	}
 
 	let ok = false;
-	if (user.passwordHash) ok = await checkPassword(password, user.passwordHash);
-	else if (envAdmin) ok = true;
-	if (!ok) throw new ConvexError("That email and password do not match.");
+	if (user?.passwordHash) ok = await checkPassword(password, user.passwordHash);
+	else if (user && envAdmin) ok = true;
 
-	let role = user.role;
-	if (role !== "admin" && email === adminEmail) {
-		await ctx.runMutation(internal.authInternal.promoteAdmin, { userId: user._id });
-		role = "admin";
-	}
-	if (envAdmin && !user.passwordHash) {
-		await ctx.runMutation(internal.authInternal.setPasswordHash, { userId: user._id, passwordHash: await hashPassword(password) });
-	} else {
-		await ctx.runMutation(internal.authInternal.touchLogin, { userId: user._id });
+	// Hub-linked accounts are authoritative at the hub. Local hashes are only a
+	// convenience copy; the configured super admin keeps a break-glass password.
+	if (ok && user && (!user.hubId || envAdmin)) {
+		return await completeLocalLogin(ctx, user, email, password, envAdmin);
 	}
 
-	const name = user.name ?? email.split("@")[0];
-	const token = await createSession(ctx, user._id, role);
-	return { token, account: { email, name, role, provider: user.provider } };
+	// Verify against the central hub, then provision/synchronise the local account.
+	let hubFailure: unknown = null;
+	let hubIdentity: HubIdentity | null = null;
+	if (hubConfigured()) {
+		try {
+			hubIdentity = await hubSignIn(email, password);
+		} catch (error) {
+			hubFailure = error;
+		}
+	}
+	if (hubIdentity) return await finishHubLogin(ctx, hubIdentity, password);
+
+	if (hubFailure instanceof HubError && hubFailure.kind === "unverified") {
+		throw new ConvexError(hubFailure.message);
+	}
+	if (ok && user) {
+		if (hubFailure instanceof HubError && hubFailure.kind === "credentials" && user.hubId) {
+			throw new ConvexError("E-WIN Hub rejected this password. Use your current hub password or reset it at ewinproject.org.");
+		}
+		// Hub unavailable: honour the last locally verified hash rather than
+		// locking every member out during an outage.
+		return await completeLocalLogin(ctx, user, email, password, envAdmin);
+	}
+	if (!user) {
+		if (hubFailure instanceof HubError && hubFailure.kind === "credentials") {
+			throw new ConvexError("That email and password do not match your E-WIN Hub or Guru AI account.");
+		}
+		if (hubFailure instanceof HubError && hubFailure.kind === "unreachable") {
+			throw new ConvexError("No local account was found and E-WIN Hub is unreachable. Try again in a moment.");
+		}
+		throw new ConvexError("No account found for this email. Create one first.");
+	}
+	throw new ConvexError("That email and password do not match. Use your E-WIN Hub password or reconnect on the Hub page.");
 }
 
 /** Create an email + password account. The super-admin email is promoted to admin. */
@@ -107,6 +205,19 @@ export const register = action({
 
 		const existing = await ctx.runQuery(internal.authInternal.lookupByEmail, { email: mail });
 		if (existing?.passwordHash) throw new ConvexError("An account already exists for this email. Sign in instead.");
+
+		// If this identity already lives in the E-WIN hub, adopt it instead of
+		// creating a second, disconnected password account.
+		if (hubConfigured()) {
+			let hub: HubIdentity | null = null;
+			try {
+				hub = await hubSignIn(mail, password);
+			} catch (error) {
+				if (error instanceof HubError && error.kind === "unverified") throw new ConvexError(error.message);
+				// No hub identity for this email: continue with a local account.
+			}
+			if (hub) return await finishHubLogin(ctx, hub, password);
+		}
 
 		const role = mail === superAdminEmail() ? "admin" : "member";
 		const displayName = name?.trim() || existing?.name || mail.split("@")[0];
@@ -125,6 +236,23 @@ export const register = action({
 export const passwordLogin = action({
 	args: { email: v.string(), password: v.string() },
 	handler: async (ctx, { email, password }) => loginCore(ctx, email, password)
+});
+
+/** Explicit E-WIN Hub sign-in. Unlike passwordLogin, local credentials are not tried. */
+export const hubLogin = action({
+	args: { email: v.string(), password: v.string() },
+	handler: async (ctx, { email, password }) => {
+		const mail = normaliseEmail(email);
+		if (!isEmail(mail)) throw new ConvexError("Enter a valid email address.");
+		if (!hubConfigured()) throw new ConvexError("E-WIN Hub is not configured on this deployment.");
+		try {
+			const hub = await hubSignIn(mail, password);
+			return await finishHubLogin(ctx, hub, password);
+		} catch (error) {
+			if (error instanceof HubError) throw new ConvexError(error.message);
+			throw error;
+		}
+	}
 });
 
 /** Super-admin password login (kept for backwards compatibility). */
@@ -154,7 +282,15 @@ export const verify = query({
 		if (!session || session.expiresAt < Date.now()) return null;
 		const user = await ctx.db.get(session.userId);
 		if (!user) return null;
-		return { email: user.email, name: user.name ?? user.email, role: user.role, provider: user.provider, avatarUrl: user.avatarUrl };
+		return {
+			email: user.email,
+			name: user.name ?? user.email,
+			role: user.role,
+			provider: user.provider,
+			avatarUrl: user.avatarUrl,
+			hubLinked: Boolean(user.hubId),
+			hubEmail: user.hubEmail ?? null
+		};
 	}
 });
 
@@ -225,5 +361,76 @@ export const listUsers = query({
 			.first();
 		if (!session || session.role !== "admin") return null;
 		return await ctx.db.query("users").order("desc").take(100);
+	}
+});
+
+/** Session inventory for the signed-in account. */
+export const sessions = query({
+	args: { token: v.string() },
+	handler: async (ctx, { token }) => {
+		const caller = await resolveSession(ctx, token);
+		if (!caller) return null;
+		const rows = await ctx.db
+			.query("sessions")
+			.withIndex("by_user", (q) => q.eq("userId", caller.user._id))
+			.order("desc")
+			.take(40);
+		return rows.map((row) => ({
+			id: row._id,
+			createdAt: row.createdAt,
+			expiresAt: row.expiresAt,
+			role: row.role,
+			current: row._id === caller.session._id
+		}));
+	}
+});
+
+/** End every session except the one making the request. */
+export const revokeOtherSessions = mutation({
+	args: { token: v.string() },
+	handler: async (ctx, { token }) => {
+		const caller = await resolveSession(ctx, token);
+		if (!caller) throw new ConvexError("Sign in to manage sessions.");
+		const rows = await ctx.db
+			.query("sessions")
+			.withIndex("by_user", (q) => q.eq("userId", caller.user._id))
+			.take(100);
+		let removed = 0;
+		for (const row of rows) {
+			if (row._id === caller.session._id) continue;
+			await ctx.db.delete(row._id);
+			removed++;
+		}
+		await ctx.runMutation(internal.audit.logInternal, {
+			actorEmail: caller.user.email,
+			action: "security.sessions_revoked",
+			targetType: "user",
+			targetId: caller.user.email,
+			outcome: "success",
+			detail: removed + " other session(s) ended by the account owner."
+		});
+		return { removed };
+	}
+});
+
+/** End one other session owned by the signed-in account. */
+export const revokeSession = mutation({
+	args: { token: v.string(), sessionId: v.id("sessions") },
+	handler: async (ctx, { token, sessionId }) => {
+		const caller = await resolveSession(ctx, token);
+		if (!caller) throw new ConvexError("Sign in to manage sessions.");
+		if (sessionId === caller.session._id) throw new ConvexError("Use Sign out to end the current session.");
+		const row = await ctx.db.get(sessionId);
+		if (!row || row.userId !== caller.user._id) throw new ConvexError("That session does not belong to your account.");
+		await ctx.db.delete(sessionId);
+		await ctx.runMutation(internal.audit.logInternal, {
+			actorEmail: caller.user.email,
+			action: "security.session_revoked",
+			targetType: "session",
+			targetId: sessionId,
+			outcome: "success",
+			detail: "A session was ended by the account owner."
+		});
+		return { removed: true };
 	}
 });

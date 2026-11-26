@@ -358,11 +358,16 @@ export default defineSchema({
 		externalId: v.optional(v.string()),
 		passwordHash: v.optional(v.string()), // "salt$sha256" for email accounts
 		status: v.optional(v.string()), // "active" | "suspended"
+		/** E-WIN central-hub identity. The hub is the source of truth for SSO. */
+		hubId: v.optional(v.string()),
+		hubEmail: v.optional(v.string()),
+		hubLinkedAt: v.optional(v.number()),
 		createdAt: v.number(),
 		lastLoginAt: v.number()
 	})
 		.index("by_email", ["email"])
-		.index("by_external", ["provider", "externalId"]),
+		.index("by_external", ["provider", "externalId"])
+		.index("by_hub", ["hubId"]),
 
 	// Opaque server sessions; the browser holds only the raw token.
 	sessions: defineTable({
