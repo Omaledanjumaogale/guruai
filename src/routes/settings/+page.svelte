@@ -13,13 +13,10 @@
 	const me = $derived(S_me ? $S_me : null);
 	let name = $state("");
 	let buildInfo = $state<any>(null);
-	let initialised = $state(false);
+	let nameDirty = $state(false);
 
 	$effect(() => {
-		if (!initialised && $workspaceName) {
-			name = $workspaceName;
-			initialised = true;
-		}
+		if (!nameDirty) name = $workspaceName;
 	});
 
 	onMount(async () => {
@@ -35,6 +32,7 @@
 		if (!name.trim()) return;
 		localStorage.setItem("guru.workspace.name", name.trim());
 		workspaceName.set(name.trim());
+		nameDirty = false;
 		try {
 			await mx("settingsMutations.setSetting", { workspaceId: wid, key: "workspace.name", value: name.trim() });
 			toastOk("Workspace name saved");
@@ -93,7 +91,7 @@
 		<h2 class="mb-3 text-sm font-semibold uppercase tracking-wider text-slate-400">Workspace</h2>
 		<label class="guru-label" for="wname">Workspace name</label>
 		<div class="flex gap-2">
-			<input id="wname" class="guru-input" bind:value={name} placeholder="My Workspace" />
+			<input id="wname" class="guru-input" bind:value={name} oninput={() => (nameDirty = true)} placeholder="My Workspace" />
 			<button class="guru-btn guru-btn-primary" onclick={saveName}>Save</button>
 		</div>
 		<p class="mt-3 text-xs leading-relaxed text-slate-500">Workspace id: <code class="rounded bg-ink-800 px-1 font-mono text-[10px]">{$workspaceId || "not initialized"}</code>. This key scopes every note, chat, capture and connector to this device profile.</p>

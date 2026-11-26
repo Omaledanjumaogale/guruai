@@ -15,7 +15,8 @@ SvelteKit + Convex + Cloudflare Pages stack, installable as a PWA on desktop and
 | Intelligence | Chat (GuruRoute auto-routing), Image / Video / Music studios, Visuals, Humanizer, AI Toolbox |
 | Research | Keywords (questions, prepositions, comparisons), Transcripts (YouTube to text), Convert |
 | Developer | Reverse API Lab (HAR to typed client, repo key extractor), Connector Vault, GuruRoute |
-| Control | Settings (install/deploy, routing rules), Super Admin console (accounts, engines, usage) |
+| Governance | Profile, Roles & Access (least-privilege RBAC with approval queue), Plan & entitlements, Messages (private support threads), Notifications |
+| Control | Settings (install/deploy, build identity, offline shell), Super Admin console (accounts, role approvals, announcements, support inbox, audit trail, deployment) |
 
 ## Stack
 
@@ -32,6 +33,13 @@ Browsers never see provider keys or password hashes; they hold an opaque `gst_..
 - **Google / GitHub OAuth** — `/oauth/{provider}/start` and `/oauth/{provider}/callback` HTTP actions
 - **Super admin** — the account matching `SUPER_ADMIN_EMAIL` is promoted to admin; `/admin` exposes the
   deployment console and can remove member accounts (admins are protected)
+- **Roles** — `admin`, `manager` and `member` ship with explicit permission bundles (22 capabilities).
+  Members can self-enable `member`; manager requests go to an approval queue. Direct assignment is
+  available to admins and every decision is written to the audit trail.
+- **Plans** — Starter, Pro Studio and Enterprise define entitlements (studios, agents, Reverse API,
+  admin, broadcasts). Granting a new plan closes the previous subscription and notifies the member.
+- **Messaging & announcements** — members open private support threads; staff reply from the admin
+  console. Announcements are drafted, then approved by a second administrator before delivery.
 - **Workspaces** — every row is scoped to a workspace key, so data stays isolated per install/account
 
 ## Local development
@@ -59,6 +67,17 @@ npx wrangler pages deploy build --project-name guruai --branch main
 Backend environment (`npx convex env set KEY value`): `SUPER_ADMIN_EMAIL`, `SUPER_ADMIN_PASSWORD`,
 `APP_URL`, `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET`, `GITHUB_CLIENT_ID`/`GITHUB_CLIENT_SECRET`,
 `RESEND_API_KEY`, `AGNES_AI_KEY`, `ADMIN_SESSION_SECRET`.
+
+## Quality gates
+
+```bash
+npm run check            # svelte-check: 0 errors, 0 warnings
+npm run build            # static build + build-info.json
+npm run assets:unique    # master art uniqueness and distinct banner copy
+npm run assets:check     # 10 WebP masters + 20 responsive derivatives in build/
+npm run verify:build     # 25 route shells, _routes.json, build identity, assets
+PRODUCTION_URL=https://guruai.ewinproject.org npm run production:verify
+```
 
 ## Reliability notes
 

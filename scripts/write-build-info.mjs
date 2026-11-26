@@ -14,12 +14,13 @@ const git = (args) => {
 };
 
 const pkg = JSON.parse(fs.readFileSync(path.join(root, "package.json"), "utf8"));
+const branch = process.env.GITHUB_REF_NAME || process.env.CF_PAGES_BRANCH || git(["rev-parse", "--abbrev-ref", "HEAD"]);
 const info = {
 	app: "Guru AI",
 	version: pkg.version,
 	commitSha: process.env.GITHUB_SHA || process.env.CF_PAGES_COMMIT_SHA || git(["rev-parse", "HEAD"]),
-	branch: process.env.GITHUB_REF_NAME || process.env.CF_PAGES_BRANCH || git(["rev-parse", "--abbrev-ref", "HEAD"]),
-	environment: process.env.CF_PAGES_BRANCH === "main" || process.env.GITHUB_REF_NAME === "master" ? "production" : "candidate",
+	branch,
+	environment: branch === "main" || branch === "master" ? "production" : "candidate",
 	builtAt: new Date().toISOString(),
 	source: "scripts/write-build-info.mjs"
 };

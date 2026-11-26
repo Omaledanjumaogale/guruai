@@ -1,9 +1,0 @@
-{
-  "app": "Guru AI",
-  "version": "1.0.0",
-  "commitSha": "0d6aa3579b55731a3b6b0885e729a56dcb7051af",
-  "branch": "master",
-  "environment": "candidate",
-  "builtAt": "2026-11-26T00:14:20.771Z",
-  "source": "scripts/write-build-info.mjs"
-}

@@ -8,6 +8,9 @@ dist/
 *.local
 .DS_Store
 
+# generated build identity (written by prebuild)
+static/build-info.json
+
 # local dev artifacts
 *.log
 preview*.log
