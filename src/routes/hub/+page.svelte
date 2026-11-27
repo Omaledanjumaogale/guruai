@@ -2,8 +2,8 @@
 	import PageHeader from "$lib/components/PageHeader.svelte";
 	import Icon from "$lib/components/Icon.svelte";
 	import { account, connectEwinIdentity, describeError, disconnectEwinIdentity, session } from "$lib/auth";
-	import { gq } from "$lib/convex";
-	import { toastOk } from "$lib/stores";
+	import { ax, gq } from "$lib/convex";
+	import { toastErr, toastOk } from "$lib/stores";
 
 	const S_hub = $derived($session ? gq<any>("hub.status", { token: $session }) : null);
 	const hub = $derived(S_hub ? $S_hub : null);
@@ -15,6 +15,8 @@
 	let error = $state("");
 	let confirming = $state(false);
 	let prefilled = $state(false);
+	let probing = $state(false);
+	let probeResult = $state<any>(null);
 
 	$effect(() => {
 		if (!prefilled && ($account?.email || hub?.hubEmail)) {
@@ -52,6 +54,20 @@
 			error = describeError(err);
 		} finally {
 			busy = false;
+		}
+	}
+
+	async function probeHub() {
+		if (probing || !$session) return;
+		probing = true;
+		try {
+			probeResult = await ax("hub.probe", { token: $session });
+			if (probeResult?.reachable) toastOk(`E-WIN Hub answered in ${probeResult.latencyMs} ms.`);
+			else toastErr("E-WIN Hub did not answer the live check. Your local session is unaffected.");
+		} catch (error) {
+			toastErr(error);
+		} finally {
+			probing = false;
 		}
 	}
 
@@ -97,8 +113,11 @@
 						<p class="mt-1 text-[11.5px] text-[var(--muted)]">{hub?.hubEmail ?? $account?.email ?? "No local account"}</p>
 					</div>
 				</div>
-				<div class="flex items-center gap-2">
+				<div class="flex flex-wrap items-center gap-2">
 					<span class="guru-chip {hub ? (linked ? 'guru-chip-green' : 'guru-chip-sky') : ''}">{hub ? (linked ? "Active" : "Not linked") : "Checking"}</span>
+					<button class="guru-btn guru-btn-ghost !px-3 !py-1.5 !text-[11px]" type="button" onclick={probeHub} disabled={probing}>
+						{probing ? "Checking…" : "Test live connection"}
+					</button>
 					{#if hub?.hubAppUrl}<a class="guru-btn guru-btn-ghost !px-3 !py-1.5 !text-[11px]" href={hub.hubAppUrl} target="_blank" rel="noreferrer">Hub profile ↗</a>{/if}
 				</div>
 			</div>
@@ -114,7 +133,7 @@
 				</div>
 				<div class="rounded-xl border border-[var(--line)] bg-[var(--surface-2)] p-3.5">
 					<p class="text-[9px] font-bold uppercase tracking-[0.13em] text-[var(--muted)]">Provider</p>
-					<p class="mt-1.5 truncate text-[11.5px] font-semibold text-[var(--ink)]">{$account?.provider === "ewin" ? "E-WIN" : ($account?.provider ?? "Password")}</p>
+					<p class="mt-1.5 truncate text-[11.5px] font-semibold text-[var(--ink)]">{linked || $account?.provider === "ewin" ? "E-WIN Hub" : ($account?.provider ?? "Password")}</p>
 				</div>
 				<div class="rounded-xl border border-[var(--line)] bg-[var(--surface-2)] p-3.5">
 					<p class="text-[9px] font-bold uppercase tracking-[0.13em] text-[var(--muted)]">Linked</p>
@@ -122,6 +141,12 @@
 				</div>
 			</div>
 		</section>
+
+		{#if probeResult}
+			<p class="rounded-xl border px-[14px] py-2.5 text-[11px] {probeResult.reachable ? 'border-[var(--green)]/30 bg-[var(--green-soft)] text-[var(--green)]' : 'border-[var(--accent)]/30 bg-[var(--accent-soft)] text-[var(--accent)]'}" role="status">
+				{probeResult.reachable ? `Live check: central API answered HTTP ${probeResult.status} in ${probeResult.latencyMs} ms at ${new Date(probeResult.checkedAt).toLocaleTimeString()}.` : `Live check failed at ${new Date(probeResult.checkedAt).toLocaleTimeString()} — no healthy response from the central API. Nothing local was changed.`}
+			</p>
+		{/if}
 
 		<div class="grid gap-4 lg:grid-cols-[1.05fr_0.95fr]">
 			<section class="guru-card p-5">
@@ -170,13 +195,13 @@
 			</section>
 
 			<section class="guru-card p-5">
-				<h2 class="text-[14px] font-extrabold tracking-tight text-[var(--ink)]">What synchronises</h2>
+				<h2 class="text-[14px] font-extrabold tracking-tight text-[var(--ink)]">Identity and workspace boundaries</h2>
 				<ul class="mt-3 space-y-2.5">
 					{#each [
-						{ label: "Identity", copy: "Hub user id, email and display name", done: linked },
-						{ label: "Access", copy: "Role, plan and workspace permissions", done: Boolean($account) },
+						{ label: "Identity", copy: "Hub user id and verified email only", done: linked },
+						{ label: "Local access", copy: "Roles, plans and permissions are managed in this workspace", done: Boolean($account) },
 						{ label: "Security", copy: "Opaque sessions with owner-controlled revocation", done: Boolean($session) },
-						{ label: "Governance", copy: "Audit trail for every link, sync and revoke", done: true }
+						{ label: "Audit trail", copy: "Link and unlink events are recorded", done: true }
 					] as row (row.label)}
 						<li class="flex items-start gap-3 rounded-xl border border-[var(--line)] bg-[var(--surface-2)] px-3.5 py-3">
 							<span class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full {row.done ? 'bg-[var(--green-soft)] text-[var(--green)]' : 'bg-[var(--surface)] text-[var(--muted)]'} text-[10px]">{row.done ? "✓" : "·"}</span>

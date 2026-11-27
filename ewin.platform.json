@@ -1,0 +1,79 @@
+{
+  "platformId": "guruai",
+  "name": "Guru AI",
+  "description": "Enterprise AI workspace for chat, creation, research, conversion and governed automation.",
+  "repoUrl": "https://github.com/Omaledanjumaogale/guru-ai",
+  "domainUrl": "https://guruai.ewinproject.org",
+  "defaultBranch": "master",
+  "sdkVersion": "3.1.0",
+  "status": "identity-connected",
+  "billing": {
+    "status": "not-cut-over",
+    "authority": "E-WIN Hub",
+    "walletSdk": "packages/ewin-wallet-sdk",
+    "reason": "No verified central platform registration, harmonization review, canonical wallet link or per-platform service key exists for guruai. Local plans are retained; no central charges are created by this application."
+  },
+  "identity": {
+    "provider": "E-WIN Hub Better Auth",
+    "canonicalSubjectField": "users.hubId",
+    "siteUrl": "https://affable-dragon-883.eu-west-1.convex.site",
+    "appUrl": "https://ewinproject.org",
+    "sessionStorage": "opaque local session only; no central session token is persisted",
+    "linkFlow": "server-to-server credential verification, then explicit link/unlink"
+  },
+  "roles": [
+    {
+      "key": "admin",
+      "name": "Super Admin"
+    },
+    {
+      "key": "manager",
+      "name": "Manager"
+    },
+    {
+      "key": "member",
+      "name": "Member"
+    }
+  ],
+  "sharedModules": {
+    "wallet": false,
+    "escrow": false,
+    "marketplace": false,
+    "bounties": false,
+    "squads": false,
+    "pam": false
+  },
+  "billableActions": [],
+  "candidateBillableActions": [
+    {
+      "actionKey": "chat.message",
+      "label": "Chat completion",
+      "chargeModel": "per_action",
+      "enabled": false
+    },
+    {
+      "actionKey": "image.generate",
+      "label": "Image generation",
+      "chargeModel": "per_action",
+      "enabled": false
+    },
+    {
+      "actionKey": "video.generate",
+      "label": "Video generation",
+      "chargeModel": "per_action",
+      "enabled": false
+    },
+    {
+      "actionKey": "agent.run",
+      "label": "Agent workflow run",
+      "chargeModel": "per_action",
+      "enabled": false
+    }
+  ],
+  "sync": {
+    "heartbeatUrl": null,
+    "eventEndpoint": null,
+    "inboundWebhook": null,
+    "status": "heartbeat-and-identity-only"
+  }
+}

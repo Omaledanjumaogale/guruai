@@ -61,19 +61,27 @@
 
 <PageHeader title="Plan & entitlements" blurb="Your plan decides what the workspace unlocks. Engines still run on keys you own." />
 
+<div class="mb-5 flex flex-wrap items-center gap-3 rounded-xl border border-[var(--line)] bg-[var(--surface-2)] px-4 py-3">
+	<span class="grid h-8 w-8 place-items-center rounded-lg bg-[var(--sky-soft)] text-[var(--sky)]" aria-hidden="true">◎</span>
+	<p class="min-w-0 flex-1 text-[11.5px] leading-relaxed text-[var(--muted)]">
+		<strong class="text-[var(--ink)]">Local entitlement record.</strong> E-WIN central wallet billing is not active for Guru AI, so this page cannot create a charge. Central balances and receipts live in the E-WIN Hub.
+	</p>
+	<a class="text-[10.5px] font-bold uppercase tracking-[0.12em] text-[var(--sky)] hover:underline" href="/hub">Hub connection →</a>
+</div>
+
 <section class="grid gap-3 sm:grid-cols-3">
 	{#if current}
 		<div class="guru-card p-5 sm:col-span-2">
-			<p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-indigo-300">Current plan</p>
-			<h2 class="mt-1 text-2xl font-bold tracking-tight text-white">{current.name}</h2>
-			<p class="mt-1 text-sm text-slate-400">{current.priceLabel}</p>
-			<p class="mt-2 text-xs text-slate-500">
+			<p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--accent)]">Current plan</p>
+			<h2 class="mt-1 text-2xl font-bold tracking-tight text-[var(--ink)]">{current.name}</h2>
+			<p class="mt-1 text-sm text-[var(--ink-soft)]">{current.priceLabel}</p>
+			<p class="mt-2 text-xs text-[var(--muted)]">
 				{#if current.startedAt}Active since {new Date(current.startedAt).toLocaleDateString()}{/if}
 				{#if current.renewsAt} · renews {new Date(current.renewsAt).toLocaleDateString()}{/if}
 			</p>
 			<div class="mt-4 flex flex-wrap gap-1.5">
 				{#each current.entitlements as feature (feature)}
-					<span class="guru-chip border-emerald-400/25 bg-emerald-400/[0.08] text-emerald-200">{FEATURE_LABELS[feature] ?? feature}</span>
+					<span class="guru-chip border-[var(--green)]/30 bg-[var(--green-soft)] text-[var(--green)]">{FEATURE_LABELS[feature] ?? feature}</span>
 				{/each}
 			</div>
 		</div>
@@ -81,37 +89,37 @@
 		<div class="guru-card p-5 sm:col-span-2"><div class="guru-skeleton h-24 w-full"></div></div>
 	{/if}
 	<div class="guru-card p-5">
-		<h2 class="text-xs font-semibold uppercase tracking-wider text-slate-500">Account</h2>
+		<h2 class="text-xs font-semibold uppercase tracking-wider text-[var(--muted)]">Account</h2>
 		{#if $session}
-			<p class="mt-2 truncate text-sm text-slate-200">{me?.account.email}</p>
-			<p class="text-xs text-slate-500">{me?.roleKeys.join(" · ") || "Member"}</p>
+			<p class="mt-2 truncate text-sm text-[var(--ink)]">{me?.account.email}</p>
+			<p class="text-xs text-[var(--muted)]">{me?.roleKeys.join(" · ") || "Member"}</p>
 			<a class="guru-btn guru-btn-ghost mt-3 !px-3 !py-1.5 !text-xs" href="/roles">Role access</a>
 		{:else}
-			<p class="mt-2 text-sm text-slate-400">Sign in to see your plan.</p>
+			<p class="mt-2 text-sm text-[var(--ink-soft)]">Sign in to see your plan.</p>
 			<a class="guru-btn guru-btn-primary mt-3" href="/login">Sign in</a>
 		{/if}
 	</div>
 </section>
 
 <section class="mt-8" aria-labelledby="plans-title">
-	<h2 id="plans-title" class="text-sm font-semibold uppercase tracking-wider text-slate-400">Plans</h2>
+	<h2 id="plans-title" class="text-sm font-semibold uppercase tracking-wider text-[var(--ink-soft)]">Plans</h2>
 	<div class="mt-3 grid gap-4 md:grid-cols-3">
 		{#if !plans}
 			{#each Array.from({ length: 3 }) as _, i (i)}<div class="guru-card p-5"><div class="guru-skeleton h-40 w-full"></div></div>{/each}
 		{:else}
 			{#each plans as plan (plan.key)}
-				<article class="guru-card p-5 {current?.key === plan.key ? 'border-indigo-400/40' : ''}">
+				<article class="guru-card p-5 {current?.key === plan.key ? 'border-[var(--accent)]' : ''}">
 					<div class="flex items-start justify-between gap-2">
 						<div>
-							<h3 class="text-base font-semibold text-white">{plan.name}</h3>
-							<p class="text-[11px] text-slate-500">{plan.priceLabel}</p>
+							<h3 class="text-base font-semibold text-[var(--ink)]">{plan.name}</h3>
+							<p class="text-[11px] text-[var(--muted)]">{plan.priceLabel}</p>
 						</div>
-						{#if current?.key === plan.key}<span class="guru-chip border-indigo-400/30 bg-indigo-400/10 text-indigo-200">Current</span>{/if}
+						{#if current?.key === plan.key}<span class="guru-chip border-[var(--accent)]/30 bg-[var(--accent-soft)] text-[var(--accent)]">Current</span>{/if}
 					</div>
-					<p class="mt-2 text-xs leading-relaxed text-slate-400">{plan.description}</p>
+					<p class="mt-2 text-xs leading-relaxed text-[var(--ink-soft)]">{plan.description}</p>
 					<ul class="mt-3 space-y-1">
 						{#each plan.entitlements as feature (feature)}
-							<li class="text-[11px] text-slate-300">✓ {FEATURE_LABELS[feature] ?? feature}</li>
+							<li class="text-[11px] text-[var(--ink-soft)]">✓ {FEATURE_LABELS[feature] ?? feature}</li>
 						{/each}
 					</ul>
 				</article>
@@ -122,12 +130,12 @@
 
 {#if $session && history.length}
 	<section class="mt-8 guru-card p-5">
-		<h2 class="text-sm font-semibold uppercase tracking-wider text-slate-400">Plan history</h2>
-		<ul class="mt-3 divide-y divide-white/8">
+		<h2 class="text-sm font-semibold uppercase tracking-wider text-[var(--ink-soft)]">Plan history</h2>
+		<ul class="mt-3 divide-y divide-[var(--line)]">
 			{#each history as row (row._id)}
 				<li class="flex flex-wrap items-center justify-between gap-2 py-2 text-xs">
-					<span class="text-slate-300">{row.planKey} · {row.status}</span>
-					<span class="text-slate-500">{new Date(row.startedAt).toLocaleDateString()}{row.grantedBy ? ` · by ${row.grantedBy}` : ""}</span>
+					<span class="text-[var(--ink-soft)]">{row.planKey} · {row.status}</span>
+					<span class="text-[var(--muted)]">{new Date(row.startedAt).toLocaleDateString()}{row.grantedBy ? ` · by ${row.grantedBy}` : ""}</span>
 				</li>
 			{/each}
 		</ul>
@@ -137,28 +145,28 @@
 {#if canManage}
 	<section class="mt-8 grid gap-4 lg:grid-cols-2">
 		<form class="guru-card p-5" onsubmit={(e) => { e.preventDefault(); grant(); }}>
-			<h2 class="text-sm font-semibold uppercase tracking-wider text-slate-400">Grant a plan</h2>
-			<p class="mt-1 text-xs text-slate-500">Changing a plan closes the previous subscription and notifies the member.</p>
+			<h2 class="text-sm font-semibold uppercase tracking-wider text-[var(--ink-soft)]">Grant a plan</h2>
+			<p class="mt-1 text-xs text-[var(--muted)]">Changing a plan closes the previous subscription and notifies the member.</p>
 			<label class="mt-3 block"><span class="guru-label">Member email</span><input class="guru-input mt-1" type="email" required bind:value={grantEmail} placeholder="member@company.com" /></label>
 			<label class="mt-3 block"><span class="guru-label">Plan</span><select class="guru-input mt-1" bind:value={grantPlan}><option value="starter">Starter</option><option value="pro">Pro Studio</option><option value="enterprise">Enterprise</option></select></label>
 			<label class="mt-3 block"><span class="guru-label">Note</span><input class="guru-input mt-1" bind:value={grantNote} maxlength="300" placeholder="Why this change? (audit)" /></label>
 			<button class="guru-btn guru-btn-primary mt-4" type="submit" disabled={busy === "grant"}>{busy === "grant" ? "Granting…" : "Grant plan"}</button>
 		</form>
 		<div class="guru-card p-5">
-			<h2 class="text-sm font-semibold uppercase tracking-wider text-slate-400">Distribution</h2>
+			<h2 class="text-sm font-semibold uppercase tracking-wider text-[var(--ink-soft)]">Distribution</h2>
 			{#if !overview}
 				<div class="guru-skeleton mt-3 h-20 w-full"></div>
 			{:else}
-				<p class="mt-2 text-xs text-slate-500">{overview.activeCount} active subscription{overview.activeCount === 1 ? "" : "s"}</p>
+				<p class="mt-2 text-xs text-[var(--muted)]">{overview.activeCount} active subscription{overview.activeCount === 1 ? "" : "s"}</p>
 				<ul class="mt-3 space-y-2">
 					{#each overview.plans as plan (plan.key)}
-						<li class="flex items-center justify-between rounded-lg bg-white/[0.03] px-3 py-2 text-xs">
-							<span class="text-slate-300">{plan.name}</span>
-							<span class="font-semibold text-white">{overview.counts[plan.key] ?? 0}</span>
+						<li class="flex items-center justify-between rounded-lg bg-[var(--surface-2)] px-3 py-2 text-xs">
+							<span class="text-[var(--ink-soft)]">{plan.name}</span>
+							<span class="font-semibold text-[var(--ink)]">{overview.counts[plan.key] ?? 0}</span>
 						</li>
 					{/each}
 				</ul>
-				<p class="mt-3 text-[11px] text-slate-500">Cancel a plan from the admin console → Accounts, or ask the member to contact support.</p>
+				<p class="mt-3 text-[11px] text-[var(--muted)]">Cancel a plan from the admin console → Accounts, or ask the member to contact support.</p>
 			{/if}
 		</div>
 	</section>

@@ -19,7 +19,8 @@
     "assets:check": "node scripts/verify-assets.mjs",
     "verify:build": "node scripts/verify-build.mjs",
     "production:verify": "node scripts/verify-production.mjs",
-    "postinstall": "svelte-kit sync"
+    "postinstall": "svelte-kit sync",
+    "verify:platform": "node scripts/verify-platform.mjs"
   },
   "devDependencies": {
     "@sveltejs/adapter-static": "^3.0.8",

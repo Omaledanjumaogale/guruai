@@ -2,7 +2,7 @@ import { v, ConvexError } from "convex/values";
 import { action, query } from "./_generated/server";
 import { api, internal } from "./_generated/api";
 import { resolveSession } from "./authz";
-import { hubAppUrl, hubConfigured, hubSignIn, HubError } from "./hubClient";
+import { hubAppUrl, hubConfigured, hubSignIn, hubSiteUrl, HubError } from "./hubClient";
 
 const normalise = (value: string) => value.trim().toLowerCase();
 
@@ -40,6 +40,49 @@ export const status = query({
 				role: caller.session.role
 			}
 		};
+	}
+});
+
+/** Live, on-demand reachability probe for the central hub.
+ * Queries deliberately stay cheap; this action runs only when a signed-in member
+ * asks for a fresh check, and it never reports a cached healthy state as live.
+ */
+export const probe = action({
+	args: { token: v.string() },
+	handler: async (ctx, { token }) => {
+		const me = await ctx.runQuery(api.auth.verify, { token });
+		if (!me) throw new ConvexError("Sign in again to test the E-WIN Hub connection.");
+		if (!hubConfigured()) {
+			return { reachable: false, configured: false, status: 0, latencyMs: 0, checkedAt: Date.now(), site: hubSiteUrl() };
+		}
+		const started = Date.now();
+		const controller = new AbortController();
+		const timer = setTimeout(() => controller.abort(), 6000);
+		try {
+			const response = await fetch(hubSiteUrl() + "/health", {
+				headers: { Accept: "application/json" },
+				signal: controller.signal
+			});
+			return {
+				reachable: response.ok,
+				configured: true,
+				status: response.status,
+				latencyMs: Date.now() - started,
+				checkedAt: Date.now(),
+				site: hubSiteUrl()
+			};
+		} catch {
+			return {
+				reachable: false,
+				configured: true,
+				status: 0,
+				latencyMs: Date.now() - started,
+				checkedAt: Date.now(),
+				site: hubSiteUrl()
+			};
+		} finally {
+			clearTimeout(timer);
+		}
 	}
 });
 

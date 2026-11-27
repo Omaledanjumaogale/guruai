@@ -1,7 +1,6 @@
 import { writable, type Writable } from "svelte/store";
 import { anyApi } from "convex/server";
 import type { FunctionReference } from "convex/server";
-import * as mocks from "./mock";
 
 /**
  * Live bridge between Svelte stores and the Convex backend.
@@ -45,9 +44,9 @@ const liveStores = new Map<string, Writable<any>>();
 
 export function gq<T = any>(path: string, args: Record<string, unknown> = {}): Writable<T | null> {
 	if (!convexReady) {
-		// Demo data until the backend connects; live data replaces it automatically.
-		const seed = (mocks.MOCKS as any)[path] ?? null;
-		return writable<T | null>(seed as T);
+		// Never render synthetic records in a real workspace. Components show their
+		// own empty/error state until a verified backend connection is available.
+		return writable<T | null>(null);
 	}
 	const key = `${path}|${JSON.stringify(args)}`;
 	const cached = liveStores.get(key);

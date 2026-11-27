@@ -15,7 +15,7 @@ SvelteKit + Convex + Cloudflare Pages stack, installable as a PWA on desktop and
 | Intelligence | GuruRoute auto-routing across every engine, Image / Video / Music studios, Visuals, Humanizer, AI Toolbox |
 | Research | Keywords (questions, prepositions, comparisons), Transcripts (YouTube to text), Convert |
 | Developer | Reverse API Lab (HAR to typed client, repo key extractor), Connector Vault, GuruRoute |
-| Identity | E-WIN Hub single identity, verified sessions, local profile sync, hub reconnect and unlink |
+| Identity | E-WIN Hub single identity, verified sessions, server-bound link/unlink and an on-demand live hub health probe |
 | Governance | Profile, Team directory, Roles & Access (least-privilege RBAC with approval queue), Security & sessions, Plan & entitlements, Messages, Notifications |
 | Control | Analytics, Activity timeline, Settings (install/deploy, build identity, offline shell), Super Admin console (accounts, roles, announcements, support inbox, audit trail, deployment) |
 
@@ -45,6 +45,17 @@ Browsers never see provider keys or password hashes; they hold an opaque `gst_..
 - **Messaging & announcements** — members open private support threads; staff reply from the admin
   console. Announcements are drafted, then approved by a second administrator before delivery.
 - **Workspaces** — every row is scoped to a workspace key, so data stays isolated per install/account
+
+## Ecosystem status
+
+- **Identity:** E-WIN Hub credentials are verified server-to-server and bound to `users.hubId`. The hub
+  password and central session token are never stored. The optional ticket-SSO flow is not enabled because
+  Guru AI is not yet in the central application registry.
+- **Billing:** local plan records remain readable, but **no central wallet, quote, hold or charge is active**.
+  Central policy keeps native platform wallets disabled until registration, harmonization, account linking,
+  backups and reconciliation are verified. `ewin.platform.json` marks this state explicitly.
+- **Evidence and gaps:** see [the ecosystem upgrade record](docs/ecosystem-upgrade/README.md) and
+  [the Cloudflare Code Mode ADR](docs/ecosystem-upgrade/ADR-001-cloudflare-code-mode.md).
 
 ## Local development
 
@@ -82,6 +93,7 @@ npm run build            # static build + build-info.json
 npm run assets:unique    # master art uniqueness and distinct banner copy
 npm run assets:check     # 10 WebP masters + 20 responsive derivatives in build/
 npm run verify:build     # 25 route shells, _routes.json, build identity, assets
+npm run verify:platform  # platform manifest: identity bound, billing honestly off
 PRODUCTION_URL=https://guruai.ewinproject.org npm run production:verify
 ```
 

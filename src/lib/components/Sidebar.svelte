@@ -17,6 +17,15 @@
 	const me = $derived(S_me ? $S_me : null);
 	const S_inbox = $derived($session ? gq<number>("messaging.unread", { token: $session }) : null);
 	const inboxUnread = $derived(S_inbox ? Number($S_inbox ?? 0) : 0);
+	// The mode switch is reserved for the platform super administrator and is
+	// driven by the server-verified RBAC identity, not the cached browser profile.
+	// Granular manager permissions still govern the admin console itself.
+	const isAdmin = $derived(me?.account?.role === "admin");
+	const onAdmin = $derived(current === "/admin" || current.startsWith("/admin/"));
+	const section = $derived(
+		NAV.filter((n) => (n.href === "/" ? current === "/" : current === n.href || current.startsWith(`${n.href}/`)))
+			.sort((a, b) => b.href.length - a.href.length)[0]?.label ?? (onAdmin ? "Admin console" : "Workspace")
+	);
 
 	function visible(item: (typeof NAV)[number]): boolean {
 		if (item.authOnly && !$session) return false;
@@ -59,7 +68,7 @@
 		<a href={$account ? "/home" : "/"} class="min-w-0" aria-label="Guru AI home">
 			<Logo size={34} tagline="Enterprise AI" />
 		</a>
-		<ThemeToggle />
+		<a href="/" class="rounded-lg border border-[var(--line)] px-2 py-1 text-[9px] font-bold uppercase tracking-[0.13em] text-[var(--muted)] transition hover:border-[var(--line-strong)] hover:text-[var(--ink)]" title="Open the public Guru AI site">Site</a>
 	</div>
 
 	<div class="px-3 pt-3">
@@ -128,22 +137,53 @@
 	</div>
 </aside>
 
-<header class="app-topbar sticky top-0 z-30 flex items-center gap-3 px-4 py-3 lg:hidden">
+<header class="app-topbar sticky top-0 z-30 flex min-h-14 items-center gap-2 px-4 py-2 sm:gap-3 lg:px-8">
 	<button
-		class="rounded-lg border border-[var(--line)] bg-[var(--surface-2)] p-1.5 text-[var(--ink-soft)]"
+		class="grid h-9 w-9 place-items-center rounded-lg border border-[var(--line)] bg-[var(--surface-2)] text-[var(--ink-soft)] transition hover:border-[var(--line-strong)] hover:text-[var(--ink)] lg:hidden"
 		onclick={() => (mobileOpen = true)}
 		aria-label="Open menu"
 	>
-		<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16" /></svg>
+		<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16" /></svg>
 	</button>
-	<a href={$account ? "/home" : "/"} class="min-w-0">
+	<a href={$account ? "/home" : "/"} class="min-w-0 lg:hidden" aria-label="Guru AI home">
 		<Logo size={27} compact tagline="" />
 	</a>
-	<div class="ml-auto flex items-center gap-2">
+	<a href="/home" class="grid h-9 w-9 place-items-center rounded-lg text-[var(--muted)] transition hover:bg-[var(--surface-2)] hover:text-[var(--ink)] sm:hidden" aria-label="Home" title="Home">
+		<Icon name="home" size={16} />
+	</a>
+	<a
+		href="/home"
+		class="hidden items-center gap-1.5 rounded-lg px-2.5 py-2 text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--muted)] transition hover:bg-[var(--surface-2)] hover:text-[var(--ink)] sm:inline-flex"
+		title="Go to your Guru AI home"
+	>
+		<Icon name="home" size={14} />
+		Home
+	</a>
+	<span class="hidden h-4 w-px bg-[var(--line)] md:block" aria-hidden="true"></span>
+	<span class="hidden truncate text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--muted)] md:block">{section}</span>
+
+	<div class="ml-auto flex items-center gap-1.5 sm:gap-2">
+		{#if isAdmin}
+			<a
+				href={onAdmin ? "/home" : "/admin"}
+				class="inline-flex h-9 items-center gap-1.5 rounded-lg border px-2.5 text-[10px] font-extrabold uppercase tracking-[0.1em] transition {onAdmin
+					? 'border-[var(--green)]/35 bg-[var(--green-soft)] text-[var(--green)] hover:border-[var(--green)]'
+					: 'border-[var(--accent)]/35 bg-[var(--accent-soft)] text-[var(--accent)] hover:border-[var(--accent)]'}"
+				aria-label={onAdmin ? "Return to user view" : "Open Admin Console"}
+				title={onAdmin ? "Return to user view" : "Open Admin Console"}
+			>
+				<Icon name={onAdmin ? "home" : "admin"} size={14} />
+				<span class="hidden sm:inline">{onAdmin ? "User view" : "Admin console"}</span>
+			</a>
+		{/if}
 		<ThemeToggle />
 		{#if $account}
-			<a href="/notifications" class="rounded-lg border border-[var(--line)] p-1.5 text-[var(--ink-soft)]" aria-label="Notifications">
+			<a href="/notifications" class="hidden h-9 w-9 place-items-center rounded-lg border border-[var(--line)] text-[var(--ink-soft)] transition hover:border-[var(--line-strong)] hover:text-[var(--ink)] sm:grid" aria-label="Notifications">
 				<Icon name="notifications" size={16} />
+			</a>
+			<a href="/profile" class="hidden h-9 items-center gap-2 rounded-lg border border-[var(--line)] pl-1 pr-2.5 transition hover:border-[var(--line-strong)] sm:inline-flex" aria-label="Open your profile">
+				<span class="grid h-7 w-7 place-items-center rounded-md bg-[var(--accent-soft)] text-[9.5px] font-extrabold text-[var(--accent)]" aria-hidden="true">{initials($account.name ?? $account.email)}</span>
+				<span class="max-w-[92px] truncate text-[10.5px] font-semibold text-[var(--ink-soft)]">{$account.name?.split(" ")[0] ?? "Account"}</span>
 			</a>
 		{:else}
 			<a href="/login" class="guru-btn guru-btn-primary !px-3 !py-1.5 !text-[11px]">Sign in</a>

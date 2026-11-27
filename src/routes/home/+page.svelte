@@ -24,7 +24,9 @@
 	const me = $derived(S_me ? $S_me : null);
 	const S_subs = $derived($session ? gq<any>("subscriptions.me", { token: $session }) : null);
 	const plan = $derived(me?.plan ?? ($S_subs ? $S_subs.plan : null));
-	const planLabel = $derived(me?.account?.role === "admin" ? "Enterprise" : (plan?.name ?? "Starter"));
+	// A super-admin role is not a paid plan. Show the actual local entitlement so
+	// governance access does not fabricate an Enterprise subscription.
+	const planLabel = $derived(plan?.name ?? "Starter");
 	const S_hub = $derived($session ? gq<any>("hub.status", { token: $session }) : null);
 	const hub = $derived(S_hub ? $S_hub : null);
 
